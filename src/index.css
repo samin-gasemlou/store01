@@ -1,0 +1,15 @@
+@import "tailwindcss";
+body{
+    background-color:#F2F3F5;
+    overflow-x: hidden;
+}
+.clip-trapezoid {
+  clip-path: polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%);
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
