@@ -52,8 +52,8 @@ export default function ProductReviews() {
   };
 
   return (
-    <section className="w-[90%] mx-auto px-4 mb-12">
-      <div className="bg-white rounded-3xl p-6 sm:p-10">
+    <section className="w-[90%] mx-auto ">
+      <div className="bg-white rounded-3xl">
 
         {/* HEADER */}
         <div className="flex items-center justify-between mb-8">
@@ -163,7 +163,7 @@ export default function ProductReviews() {
 
           <button
             onClick={handleSubmit}
-            className="bg-[#FF6A3D] text-white md:w-[197px] w-full px-10 py-3 rounded-lg mt-4 hover:opacity-90"
+            className="bg-[#2B4168] text-white md:w-[197px] w-full px-10 py-3 rounded-lg mt-4 hover:opacity-90"
           >
             Submit
           </button>

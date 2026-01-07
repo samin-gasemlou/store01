@@ -2,7 +2,7 @@ import { useRef } from "react";
 import ProductCard from "../../common/ProductCard";
 import { products } from "../../../data/products";
 
-export default function MenCollection() {
+export default function Recommend() {
   const sliderRef = useRef(null);
   const cardRef = useRef(null);
 
@@ -27,13 +27,13 @@ export default function MenCollection() {
         "
       />
 
-      <div className="w-full mx-auto  relative">
+      <div className="w-full mx-auto px-4 relative">
   <div className="flex flex-row items-center justify-between gap-4">
 
     {/* SLIDER */}
     <div
       className="
-        w-full md:w-[72%]
+        w-full md:w-[71%]
         relative
         md:absolute md:right-10 md:bottom-0
       "
@@ -93,7 +93,7 @@ function ImageBlock() {
     <div className="flex items-center justify-center">
       <img
         src="/menn.png"
-        className="w-[283px] h-[413px] object-cover rounded-3xl"
+        className="hidden md:block w-[283px] h-[413px] object-cover rounded-3xl"
         alt=""
       />
     </div>

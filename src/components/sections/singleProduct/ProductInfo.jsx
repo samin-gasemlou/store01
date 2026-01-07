@@ -57,21 +57,7 @@ export default function ProductInfo({ product }) {
         {product.description}
       </p>
 
-      {/* SIZE */}
-      <div className="flex md:flex-col gap-2">
-        <label className="font-medium">Size:</label>
-        <select
-          value={size}
-          onChange={(e) => setSize(e.target.value)}
-          className="w-[81px] h-[29px] border border-[#1C1E1F] rounded-lg text-sm"
-        >
-          <option>50 Mil</option>
-          <option>90 Mil</option>
-          <option>120 Mil</option>
-        </select>
-      </div>
-
-      {/* QTY */}
+    {/* QTY */}
       <div className="flex md:flex-col gap-2">
         <label className="font-medium">Qty:</label>
 
@@ -93,15 +79,32 @@ export default function ProductInfo({ product }) {
           </button>
         </div>
       </div>
+    {/* SIZE */}
+      <div className="flex md:flex-col gap-2">
+        <label className="font-medium">Size:</label>
+        <select
+          value={size}
+          onChange={(e) => setSize(e.target.value)}
+          className="w-[81px] h-[29px] border border-[#1C1E1F] rounded-lg text-sm"
+        >
+          <option>50 Mil</option>
+          <option>90 Mil</option>
+          <option>120 Mil</option>
+        </select>
+      </div>
+
+
+
+
 
       {/* PRICE */}
-      <p className="text-2xl font-semibold text-[#FF693B]">
+      <p className="text-2xl font-semibold text-[#2B4168]">
         {product.price}
       </p>
 
       {/* BUTTONS */}
-      <div className="flex md:flex-col sm:flex-row gap-4 mt-2">
-        <button onClick={addToCart} className="bg-[#FF693B] text-white md:py-4 py-2 px-8 rounded-lg text-sm sm:text-base hover:bg-[#FF693B] transition w-[90%] md:w-[303px]">
+      <div className="flex flex-row gap-4 mt-2">
+        <button onClick={addToCart} className="bg-[#2B4168] text-white md:py-4 py-2 px-8 rounded-lg text-sm sm:text-base hover:bg-[#2B4168] transition w-[90%] md:w-[303px]">
           ADD TO CART
         </button>
 
@@ -113,21 +116,21 @@ export default function ProductInfo({ product }) {
       {/* FEATURES */}
       <div className="flex items-center justify-center gap-6 mt-10 text-center text-sm">
         <div className="flex items-center justify-center md:flex-row flex-col gap-2">
-          <div className="w-12 h-12 rounded-full border border-[#FF693B] flex items-center justify-center text-[#FF693B]">
+          <div className="w-12 h-12 rounded-full border border-[#2B4168] flex items-center justify-center text-[#2B4168]">
             <img src="/truck-fast.svg" alt="" />
           </div>
           <p>Fast shipping</p>
         </div>
 
         <div className="flex items-center justify-center md:flex-row flex-col gap-2">
-          <div className="w-12 h-12 rounded-full border border-[#FF693B] flex items-center justify-center text-[#FF693B]">
+          <div className="w-12 h-12 rounded-full border border-[#2B4168] flex items-center justify-center text-[#2B4168]">
             <img src="/medal-star.svg" alt="" />
           </div>
           <p>Quality assurance</p>
         </div>
 
         <div className="flex items-center justify-center md:flex-row flex-col gap-2">
-          <div className="w-12 h-12 rounded-full border border-[#FF693B] flex items-center justify-center text-[#FF693B]">
+          <div className="w-12 h-12 rounded-full border border-[#2B4168] flex items-center justify-center text-[#2B4168]">
             <img src="/headphone.svg" alt="" />
           </div>
           <p>Online support</p>

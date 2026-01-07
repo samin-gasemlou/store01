@@ -95,7 +95,7 @@ export default function Checkout() {
                     {item.title} × {item.qty}
                   </span>
                 </div>
-                <span className="text-[#FF6A3D]">
+                <span className="text-[#2B4168]">
                   {(item.price * item.qty).toLocaleString()} Toman
                 </span>
               </div>
@@ -120,7 +120,7 @@ export default function Checkout() {
                     />
                     {method.title}
                     {method.price > 0 && (
-                      <span className="text-[#FF6A3D]">
+                      <span className="text-[#2B4168]">
                         {method.price.toLocaleString()} Toman
                       </span>
                     )}
@@ -130,7 +130,7 @@ export default function Checkout() {
 
               <div className="flex justify-between font-semibold text-base pt-4">
                 <span>Total</span>
-                <span className="text-[#FF6A3D]">{total.toLocaleString()} Toman</span>
+                <span className="text-[#2B4168]">{total.toLocaleString()} Toman</span>
               </div>
             </div>
           </div>
@@ -220,7 +220,7 @@ export default function Checkout() {
 
             <button
               onClick={submitOrder}
-              className="w-full bg-[#FFD6B3] py-3 rounded-lg font-medium mt-6"
+              className="w-full bg-[#2b41682a] py-3 rounded-lg font-medium mt-6"
             >
               Place Order
             </button>

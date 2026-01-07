@@ -71,7 +71,7 @@ export default function Contact() {
 
             <button
               type="submit"
-              className="w-full bg-[#F2853D] text-white py-3 rounded-lg mt-6 font-medium"
+              className="w-full bg-[#2B4168] text-white py-3 rounded-lg mt-6 font-medium"
             >
               Send Message
             </button>

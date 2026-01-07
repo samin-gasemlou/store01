@@ -14,7 +14,7 @@ export default function SponsorSlider() {
   };
 
   return (
-    <section className="w-full py-10 relative md:mt-60 md:mb-26">
+    <section className="w-full md:py-10 py-0 mt-0 mb-8 relative md:mt-24 md:mb-26">
       <div className="max-w-7xl mx-auto px-4 relative">
 
         {/* Buttons */}

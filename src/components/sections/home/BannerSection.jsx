@@ -1,6 +1,6 @@
 export default function BannerSection() {
   return (
-    <section className="w-full relative md:mt-24 md:mb-26">
+    <section className="w-full relative md:mt-24 md:mb-26 mt-8 mb-0">
 
       <div className="
         w-full h-full 
@@ -20,7 +20,7 @@ export default function BannerSection() {
 
           {/* Orange BG */}
           <div className="
-            absolute bg-[#FF6A3D] 
+            absolute bg-[#2B4168] 
             w-[700px] h-[230px] 
             rounded-br-3xl rounded-tr-3xl
             top-10 left-1/2 md:left-0 
@@ -30,7 +30,7 @@ export default function BannerSection() {
 
           {/* Main Image */}
           <img 
-            src="./perfume.png"
+            src="./insta.svg"
             alt="Perfume"
             className="
               w-[320px] object-contain 
@@ -40,50 +40,29 @@ export default function BannerSection() {
               translate-x-1/2 md:translate-x-0
             "
           />
-
-          {/* Flower Image */}
-          <img 
-            src="./fl.png"
-            alt="flower"
-            className="
-              w-[220px] object-contain 
-              absolute 
-              top-24 
-              right-1/2 md:right-60 
-              translate-x-1/2 md:translate-x-0 
-              -z-10
-            "
-          />
         </div>
 
         {/* RIGHT TEXT */}
         <div className="
           w-full md:w-1/2 
           h-[200px] 
-          flex flex-col items-center md:items-start 
+          flex flex-col items-center
           justify-center 
-          mt-40 md:mt-0 
-          relative md:absolute 
-          right-0 top-8
+          mt-80 md:mt-16
+          relative  
         ">
 
           {/* Right Pattern */}
           <img 
-            src="/pattern.svg"
+            src="/s.png"
             alt=""
             className="
-              absolute 
-              right-0 bottom-0 
               w-[190px] 
-              opacity-70 
-              pointer-events-none 
-              hidden md:block
             "
           />
 
-          <h2 className="text-4xl sm:text-5xl font-semibold md:mt-0 mt-32">01 Store</h2>
           <p className="text-gray-600 mt-4 text-sm sm:text-base text-center md:text-left">
-            Perfume is not just for smelling good, it's for conveying meaning.
+            Don't Miss the Drop! Follow us for Secret Deals.
           </p>
         </div>
 

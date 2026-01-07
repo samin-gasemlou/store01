@@ -44,25 +44,35 @@ export default function Store() {
     : "Store";
 
   return (
-    <section className="flex flex-col items-center">
+    <section className="flex flex-col items-center w-full">
       <Navbar />
 
-      <div className="w-full max-w-7xl px-4">
+      <div className="w-full max-w-7xl mx-auto px-4">
         <BreadCrumb category={category} subCategory={subCategory} />
 
-        <h1 className="text-center text-xl font-semibold mb-8">
+        <h1 className="text-center text-xl font-semibold mb-8 w-full">
           {title}
         </h1>
 
         {/* PRODUCTS GRID */}
         <div
           className="
-            grid
-            grid-cols-1
-            sm:grid-cols-3
-            md:grid-cols-4
-            lg:grid-cols-5
-            gap-6 mb-12
+    grid
+    grid-cols-1
+    sm:grid-cols-2
+    md:grid-cols-3
+    lg:grid-cols-4
+    xl:grid-cols-5
+
+    gap-x-6
+    sm:gap-x-6
+    lg:gap-x-8
+
+    gap-y-10
+    lg:gap-y-4
+    xl:gap-y-4
+
+    mb-12
           "
         >
           {currentProducts.map((item) => (
@@ -72,7 +82,7 @@ export default function Store() {
 
        {/* PAGINATION */}
       {totalPages > 1 && (
-       <div className="flex flex-wrap justify-center items-center gap-2 mb-20">
+       <div className="flex flex-wrap justify-center items-center gap-2 mb-20 w-full">
 
     {/* PREV */}
     <button

@@ -86,7 +86,7 @@ export default function Cart() {
 
                 {/* TOTAL */}
                 <div className="flex items-center justify-between">
-                  <span className="text-[#FF6A3D] font-medium">{(item.price * item.qty).toLocaleString()} Toman</span>
+                  <span className="text-[#2B4168] font-medium">{(item.price * item.qty).toLocaleString()} Toman</span>
                   <button onClick={() => removeItem(item.id)} className="text-gray-400 text-xl">×</button>
                 </div>
               </div>
@@ -95,8 +95,8 @@ export default function Cart() {
             {/* ACTIONS */}
             <div className="flex flex-wrap gap-4 mt-6">
               <input placeholder="Discount code" className="border rounded-lg px-4 py-2 text-sm" />
-              <button className="bg-[#FFD6B3] px-6 py-2 rounded-lg text-sm">Apply Coupon</button>
-              <button className="bg-[#FFD6B3] px-6 py-2 rounded-lg text-sm">Update Cart</button>
+              <button className="bg-[#2b41682a] px-6 py-2 rounded-lg text-sm">Apply Coupon</button>
+              <button className="bg-[#2b41682a] px-6 py-2 rounded-lg text-sm">Update Cart</button>
             </div>
           </div>
 
@@ -115,18 +115,18 @@ export default function Cart() {
                 <label key={method.id} className="flex items-center gap-2 text-sm cursor-pointer">
                   <input type="radio" checked={shipping.id === method.id} onChange={() => setShipping(method)} />
                   {method.title}
-                  {method.price > 0 && <span className="text-[#FF6A3D]">{method.price.toLocaleString()} Toman</span>}
+                  {method.price > 0 && <span className="text-[#2B4168]">{method.price.toLocaleString()} Toman</span>}
                 </label>
               ))}
             </div>
 
             <div className="flex justify-between font-semibold mb-6">
               <span>Total</span>
-              <span className="text-[#FF6A3D]">{total.toLocaleString()} Toman</span>
+              <span className="text-[#2B4168]">{total.toLocaleString()} Toman</span>
             </div>
 
             <Link to={"/checkout"}>
-              <button className="w-full bg-[#FFD6B3] py-3 rounded-lg font-medium">Proceed to Checkout</button>
+              <button className="w-full bg-[#2b41682a] py-3 rounded-lg font-medium">Proceed to Checkout</button>
             </Link>
           </div>
 

@@ -22,6 +22,11 @@ export const categories = [
   {
     id: 5,
     title: "New Arrivals",
-    img: "/new.png",
+    img: "/unisex.png",
+  },
+    {
+    id: 6,
+    title: "Men’s Fragrances",
+    img: "/men.png",
   },
 ];

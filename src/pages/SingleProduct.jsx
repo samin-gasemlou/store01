@@ -7,8 +7,6 @@ import BreadCrumb from "../components/layout/BreadCrumb";
 import Footer from "../components/layout/Footer";
 import ProductInfo from "../components/sections/singleProduct/ProductInfo";
 import ProductTabs from "../components/sections/singleProduct/ProductTabs";
-import ProductDescription from "../components/sections/singleProduct/ProductDescription";
-import ProductReviews from "../components/sections/singleProduct/ProductReviews";
 import RelatedProducts from "../components/sections/singleProduct/RelatedProducts";
 
 export default function SingleProduct() {
@@ -55,8 +53,7 @@ export default function SingleProduct() {
       </div>
 
       <ProductTabs product={product} />
-      <ProductDescription />
-      <ProductReviews />
+      
 
       <RelatedProducts
         currentProductId={product.id}

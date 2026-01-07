@@ -62,7 +62,7 @@ export default function AccountPage() {
                 placeholder="Email"
               />
 
-              <button className="w-full bg-[#FFD6B3] py-2 rounded-lg font-medium">
+              <button className="w-full bg-[#2b41682a] py-2 rounded-lg font-medium">
                 Save Changes
               </button>
             </form>
@@ -93,7 +93,7 @@ export default function AccountPage() {
                 placeholder="New Password"
               />
 
-              <button className="w-full bg-[#FFD6B3] py-2 rounded-lg font-medium">
+              <button className="w-full bg-[#2b41682a] py-2 rounded-lg font-medium">
                 Update Password
               </button>
             </form>
@@ -111,7 +111,7 @@ export default function AccountPage() {
 
             <button
               onClick={logout}
-              className="w-full border border-red-500 text-red-500 py-2 rounded-lg font-medium"
+              className="w-full border border-[#2B4168] text-[#2B4168] py-2 rounded-lg font-medium"
             >
               Logout
             </button>

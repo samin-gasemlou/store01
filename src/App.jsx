@@ -9,6 +9,7 @@ import SearchPage from "./pages/SearchPage";
 import Wish from "./pages/Wish";
 import AccountPage from "./pages/AccountPage";
 
+
 export default function App() {
   return (
      <BrowserRouter>
@@ -25,9 +26,6 @@ export default function App() {
         <Route path="/search" element={<SearchPage />} />
         <Route path="/wish" element={<Wish />} />
         <Route path="/account" element={<AccountPage />} />
-
-
-
 
       </Routes>
     </BrowserRouter>

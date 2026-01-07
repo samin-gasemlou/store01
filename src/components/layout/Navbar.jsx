@@ -8,8 +8,8 @@ export default function Navbar() {
   const [langOpen, setLangOpen] = useState(false); // ← فقط همین اضافه شده
 
   return (
-    <header className="w-[95%] py-6">
-      <div className="absolute w-[605px] h-[705px] right-[-100px] top-[-253px] bg-[radial-gradient(50%_50%_at_50%_50%,rgba(255,105,59,0.15)_0%,rgba(153,63,35,0)_100%)] -z-10" />
+    <header className="w-full py-6">
+      <div className="absolute w-[605px] h-[705px] right-[-100px] top-[-253px] bg-[radial-gradient(50%_50%_at_50%_50%,rgba(43,65,104,0.15)_0%,rgba(43,65,104,0)_100%)] -z-10" />
 
       <div className="max-w-[1400px] mx-auto flex items-center justify-between px-4 sm:px-6">
 
@@ -18,8 +18,7 @@ export default function Navbar() {
 
           {/* Logo */}
           <div className="leading-none">
-            <p className="text-[#FF693B] text-lg sm:text-xl font-medium tracking-wide">01</p>
-            <p className="text-[#FF693B] text-xl sm:text-2xl font-semibold tracking-wide">STORE</p>
+            <img src="/logo.svg" alt="" />
           </div>
 
           {/* Language Dropdown */}

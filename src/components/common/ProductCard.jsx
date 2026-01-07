@@ -48,7 +48,7 @@ export default function ProductCard({ id, title, img, price }) {
 
   return (
     <Link to={`/product/${id}`} className="block">
-      <div className="bg-white min-w-[250px] h-[330px] rounded-2xl relative p-4 shrink-0">
+      <div className="bg-white min-w-[230px] h-[328px]  rounded-2xl relative p-4 shrink-0">
         {/* Heart icon */}
         <img
           onClick={toggleWishlist}
@@ -73,7 +73,7 @@ export default function ProductCard({ id, title, img, price }) {
             <img src="/shopping-cart.svg" className="w-5 cursor-pointer" />
           </button>
 
-          <p className="text-[#FF693B] text-[18px] font-semibold">
+          <p className="text-[#2B4168] text-[18px] font-semibold">
             {numericPrice.toLocaleString()} Toman
           </p>
         </div>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-
+import ProductReviews from "../singleProduct/ProductReviews";
 export default function ProductTabs({ product }) {
   const [activeTab, setActiveTab] = useState("specs");
 
@@ -60,9 +60,7 @@ export default function ProductTabs({ product }) {
 
         {/* REVIEWS */}
         {activeTab === "reviews" && (
-          <div className="text-gray-600 text-sm">
-            Reviews will be added soon...
-          </div>
+          <ProductReviews />
         )}
 
       </div>
@@ -81,8 +79,8 @@ function TabButton({ active, children, onClick }) {
         transition
         ${
           active
-            ? "bg-[#FF693B] text-white border-[#FF693B]"
-            : "bg-transparent text-[#FF693B] border-[#FF693B] hover:bg-[#ff693b1b]"
+            ? "bg-[#2B4168] text-white border-[#2B4168]"
+            : "bg-transparent text-[#2B4168] border-[#2B4168] hover:bg-[#2b416838]"
         }
       `}
     >

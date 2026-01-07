@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="w-[90%] rounded-t-3xl bg-[#FFFFFF] pt-24 pb-10 relative">
+    <footer className="w-full rounded-t-3xl bg-[#FFFFFF] pt-24 pb-10 relative">
 
       {/* === Top Trapezoid / Capsule Shape === */}
       <div className="absolute md:-top-8 top-0 left-1/2 -translate-x-1/2 z-20">
@@ -8,14 +8,14 @@ export default function Footer() {
           className="
             bg-[#F2F3F5]
             rounded-b-3xl
-            px-12
-            md:py-4
+            px-16
+            md:py-4 py-2
             text-center
             flex flex-col
             items-center
             border-0
-            md:w-[230px]
-            w-[200px]
+            md:w-[200px]
+            w-[195px]
           "
           style={{
             borderTopLeftRadius: "0",
@@ -23,13 +23,7 @@ export default function Footer() {
             clipPath: "polygon(0 0, 100% 0, 85% 100%, 15% 100%)",
           }}
         >
-          <span className="text-[#FF6A3A] text-[18px] font-semibold">
-            01
-          </span>
-
-          <span className="text-[#FF6A3A] text-[22px] font-bold tracking-wide">
-            STORE
-          </span>
+          <img src="/s2.png" alt="" />
         </div>
       </div>
 
@@ -58,10 +52,10 @@ export default function Footer() {
             <h3 className="text-[20px] font-semibold mb-4">Quick Access</h3>
 
             <ul className="space-y-2 text-[15px] text-gray-800">
-              <li className="flex items-center gap-2"><span className="text-[#FF6A3A]">•</span> Store</li>
-              <li className="flex items-center gap-2"><span className="text-[#FF6A3A]">•</span> Blog</li>
-              <li className="flex items-center gap-2"><span className="text-[#FF6A3A]">•</span> Contact us</li>
-              <li className="flex items-center gap-2"><span className="text-[#FF6A3A]">•</span> About us</li>
+              <li className="flex items-center gap-2"><span className="text-[#2B4168]">•</span> Store</li>
+              <li className="flex items-center gap-2"><span className="text-[#2B4168]">•</span> Blog</li>
+              <li className="flex items-center gap-2"><span className="text-[#2B4168]">•</span> Contact us</li>
+              <li className="flex items-center gap-2"><span className="text-[#2B4168]">•</span> About us</li>
             </ul>
           </div>
 
@@ -88,8 +82,8 @@ export default function Footer() {
 
         <div className="w-full h-px bg-[#F2F3F5] my-10"></div>
 
-        <p className="text-center text-gray-700 text-[15px]">
-          Lorem ipsum dolor sit amet, consectetur
+        <p className="text-center text-[#444444] text-[15px]">
+          Concept & Execution by <span className="text-[#2B4168]"> Amirhosein Ghavidel </span>
         </p>
       </div>
     </footer>
