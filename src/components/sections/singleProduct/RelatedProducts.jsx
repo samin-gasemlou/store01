@@ -129,7 +129,12 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
         {loopProducts.map((product, index) => (
           <div
             key={index}
-            className="product-card shrink-0 w-[45%] sm:w-[220px]"
+            className=" 
+            product-card
+            shrink-0
+            w-full
+            sm:w-[48%]
+            md:w-[220px]"
           >
             <ProductCard {...product} />
           </div>
