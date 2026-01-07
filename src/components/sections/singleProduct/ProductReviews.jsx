@@ -52,7 +52,7 @@ export default function ProductReviews() {
   };
 
   return (
-    <section className="w-[90%] mx-auto ">
+    <section className="w-full mx-auto ">
       <div className="bg-white rounded-3xl">
 
         {/* HEADER */}

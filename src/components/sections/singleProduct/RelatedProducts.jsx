@@ -89,7 +89,7 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
   };
 
   return (
-    <section className="w-[90%] mx-auto px-4 mt-6 mb-26">
+    <section className="w-full mx-auto px-4 mt-6 mb-26">
       {/* HEADER */}
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-xl font-semibold">Related products</h3>
@@ -121,9 +121,9 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
         onPointerUp={onPointerUp}
         onPointerLeave={onPointerUp}
         className="
-          flex gap-12 overflow-x-scroll no-scrollbar
+          flex gap-8 overflow-x-scroll no-scrollbar
           cursor-grab active:cursor-grabbing
-          scroll-smooth pb-4 select-none
+          scroll-smooth pb-4 select-none w-full
         "
       >
         {loopProducts.map((product, index) => (

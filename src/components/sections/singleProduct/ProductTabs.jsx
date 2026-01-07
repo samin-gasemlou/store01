@@ -4,10 +4,10 @@ export default function ProductTabs({ product }) {
   const [activeTab, setActiveTab] = useState("specs");
 
   return (
-    <section className="w-[90%] mx-auto md:px-4 mt-16 mb-4">
+    <section className="w-full mx-auto md:px-4 mt-16 mb-4">
 
       {/* TABS HEADER */}
-      <div className="flex md:flex-wrap gap-3">
+      <div className="flex md:flex-wrap gap-3 w-full">
         <TabButton
           active={activeTab === "specs"}
           onClick={() => setActiveTab("specs")}
@@ -31,7 +31,7 @@ export default function ProductTabs({ product }) {
       </div>
 
       {/* CONTENT */}
-      <div className="bg-white rounded-tr-3xl rounded-bl-3xl rounded-br-3xl p-6 sm:p-10">
+      <div className="bg-white rounded-tr-3xl rounded-bl-3xl rounded-br-3xl p-6 sm:p-10 w-full">
 
         {/* SPECIFICATIONS */}
         {activeTab === "specs" && (
@@ -53,7 +53,7 @@ export default function ProductTabs({ product }) {
 
         {/* DESCRIPTION */}
         {activeTab === "desc" && (
-          <p className="text-gray-600 leading-relaxed text-sm sm:text-base max-w-4xl">
+          <p className="text-gray-600 leading-relaxed text-sm sm:text-base w-full">
             {product.description}
           </p>
         )}
