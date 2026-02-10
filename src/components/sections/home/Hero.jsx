@@ -19,7 +19,6 @@ export default function HeroSlider() {
           relative isolate
           mx-auto
           w-full
-          max-w-7xl
           h-[200px]
           sm:h-[280px]
           md:h-[340px]

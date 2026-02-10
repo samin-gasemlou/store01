@@ -18,7 +18,7 @@ function HomePage() {
    <div  className={`flex items-center justify-center flex-col w-full`}>
     <Navbar />
     <Hero/>
-    <Container><HomeCategories/></Container>
+    <HomeCategories/>
     <MenCollection />
     <Banners />
     <DiscountSection />
