@@ -48,30 +48,32 @@ export default function ProductCard({ id, title, img, price }) {
   };
 
   return (
-    <Link to={`/product/${id}`} className="block w-full">
+    <Link to={`/product/${id}`} className="block shrink-0">
       <div
         className="
-         bg-white
-      w-[230px] max-w-[85vw]   /* 👈 کلیدی */
-      h-[328px]
-      rounded-2xl
-      relative
-      p-4
-      shrink-0
-      overflow-hidden
+          bg-white
+          w-full md:w-[clamp(200px,48vw,230px)]
+          h-[328px]
+          rounded-[10px]
+          relative
+          p-4
+          shrink-0
+          overflow-hidden
         "
       >
         <img
           onClick={toggleWishlist}
           src={liked ? "/heart-fill.svg" : "/heart.svg"}
           className="absolute top-4 left-4 w-5"
+          alt=""
         />
 
         <div className="w-full flex justify-center mt-4">
-          <img src={img} className="h-40 object-contain" />
+          <img src={img} className="h-40 object-contain" alt="" />
         </div>
 
-        <p className="text-center mt-4 font-medium text-[17px]">
+        {/* 🔤 Title – responsive font */}
+        <p className="text-center mt-4 font-medium text-[14px] sm:text-[16px] md:text-[17px]">
           {title}
         </p>
 
@@ -80,10 +82,11 @@ export default function ProductCard({ id, title, img, price }) {
             onClick={addToCart}
             className="bg-[#EFEFEF] w-12 h-12 rounded-xl flex items-center justify-center"
           >
-            <img src="/shopping-cart.svg" className="w-5" />
+            <img src="/shopping-cart.svg" className="w-5" alt="" />
           </button>
 
-          <p className="text-[#2B4168] text-[18px] font-semibold">
+          {/* 💰 Price – responsive font */}
+          <p className="text-[#2B4168] text-[14px] sm:text-[16px] md:text-[18px] font-semibold">
             {numericPrice.toLocaleString()} Toman
           </p>
         </div>

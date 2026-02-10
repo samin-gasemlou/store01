@@ -1,11 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import ProductCard from "../components/common/ProductCard";
 import { products } from "../data/products";
 
 export default function SearchPage() {
-  const [query, setQuery] = useState("");
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const initialQuery = params.get("q") || "";
+
+  const [query, setQuery] = useState(initialQuery);
+
+  // وقتی URL عوض شد (مثلاً سرچ جدید)، state هم آپدیت بشه
+  useEffect(() => {
+    setQuery(initialQuery);
+  }, [initialQuery]);
 
   const filteredProducts = products.filter((product) =>
     product.title.toLowerCase().includes(query.toLowerCase())
@@ -16,7 +26,7 @@ export default function SearchPage() {
       <Navbar />
 
       {/* SEARCH HEADER */}
-      <div className="w-full max-w-7xl px-4 mt-10">
+      <div className="w-full max-w-7xl px-4 mt-10 lg:block hidden">
         <h1 className="text-xl font-semibold text-center mb-6">
           Search Products
         </h1>

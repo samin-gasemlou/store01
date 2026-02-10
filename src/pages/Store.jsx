@@ -47,7 +47,7 @@ export default function Store() {
     <section className="flex flex-col items-center w-full">
       <Navbar />
 
-      <div className="w-full max-w-7xl mx-auto px-4">
+      <div className="w-full max-w-7xl mx-auto px-4 mt-20 z-50">
         <BreadCrumb category={category} subCategory={subCategory} />
 
         <h1 className="text-center text-xl font-semibold mb-8 w-full">

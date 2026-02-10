@@ -21,13 +21,14 @@ export default function BannerSection() {
           {/* Orange BG */}
           <div className="
             absolute bg-[#2B4168]
-    w-[700px] h-[230px]
+    md:w-[700px] w-[350px] h-[230px]
     rounded-br-3xl rounded-tr-3xl
-    top-10 left-1/2 md:left-0
+    top-10 left-0
     -translate-x-1/2 md:translate-x-0
-    -z-10
-    hidden md:block
+    z-10
+     md:block
           "></div>
+
 
           {/* Main Image */}
           <img 
@@ -37,7 +38,7 @@ export default function BannerSection() {
               w-[320px] object-contain 
               absolute 
               -top-14 md:-top-14 
-              right-1/2 md:right-28 
+              right-1/2 md:right-28 z-10
               translate-x-1/2 md:translate-x-0
             "
           />

@@ -43,11 +43,14 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
       <div className="flex justify-between mb-6">
         <h3 className="text-xl font-semibold">Related products</h3>
         <div className="flex gap-2">
-          <button onClick={() => scrollByCard(-1)} className="w-9 h-9 border rounded-full">
-            <ChevronLeft size={18} />
+          <button onClick={() => scrollByCard(-1)} className="w-9 h-9 rounded-full">
+                      <img src="/arrow-circle-left.svg" alt="" />
+
           </button>
-          <button onClick={() => scrollByCard(1)} className="w-9 h-9 border rounded-full">
-            <ChevronRight size={18} />
+          <button onClick={() => scrollByCard(1)} className="w-9 h-9 rounded-full">
+                      <img src="/arrow-circle-left3.svg" alt="" />
+                      
+
           </button>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MainLayout from "./components/layout/MainLayout";
-
+import SignIn from "./pages/SignIn";
+import SignUp from "./pages/SignUp";
 import HomePage from "./pages/HomePage";
 import Store from "./pages/Store";
 import SingleProduct from "./pages/SingleProduct";
@@ -27,6 +28,8 @@ export default function App() {
           <Route path="/search" element={<SearchPage />} />
           <Route path="/wish" element={<Wish />} />
           <Route path="/account" element={<AccountPage />} />
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} />
         </Routes>
       </MainLayout>
     </BrowserRouter>

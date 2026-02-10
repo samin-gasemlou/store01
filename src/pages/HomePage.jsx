@@ -9,6 +9,7 @@ import Navbar from "../components/layout/Navbar"
 import SponsorSlider from "../components/sections/home/SponsorSlider"
 import Footer from "../components/layout/Footer"
 import Container from "../components/ui/Container"
+import DiscountSection from "../components/sections/home/DiscountSection"
 
 function HomePage() {
 
@@ -20,6 +21,7 @@ function HomePage() {
     <Container><HomeCategories/></Container>
     <MenCollection />
     <Banners />
+    <DiscountSection />
     <WomenCollection />
     <Recommend />
     <BannerSection />

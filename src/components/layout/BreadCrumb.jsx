@@ -3,7 +3,7 @@ import { fromSlug } from "../../utils/slug";
 
 export default function BreadCrumb({ category, subCategory }) {
   return (
-    <nav className="text-sm text-gray-500 mb-8 w-full flex items-center justify-center md:justify-start">
+    <nav className="text-[12px] text-gray-500 mb-8 w-full flex items-center justify-center md:justify-start">
       <Link to="/" className="hover:text-black">Home</Link>
       <span className="md:mx-2 mx-1">›</span>
 

@@ -53,7 +53,7 @@ export default function Navbar() {
         </div>
 
         {/* DESKTOP NAV */}
-        <nav className="hidden lg:flex items-center gap-8 text-[15px]">
+        <nav className="hidden lg:flex items-center gap-8 text-[15px] ">
           <Link to="/">Home</Link>
           <ProductsDropdown />
           <Link to="/store">Store</Link>

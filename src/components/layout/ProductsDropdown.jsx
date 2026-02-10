@@ -18,7 +18,7 @@ export default function ProductsDropdown() {
 
       <div
         className={`
-          absolute top-6 left-0 bg-white shadow-lg rounded-md py-3 w-56 z-30
+          absolute top-6 left-0 bg-white shadow-lg rounded-md py-3 w-56 z-50
           transition-all duration-200 ease-out
           ${open ? "opacity-100 visible translate-y-0" : "opacity-0 invisible -translate-y-2 pointer-events-none"}
         `}

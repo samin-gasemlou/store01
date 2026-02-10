@@ -35,10 +35,10 @@ export default function SingleProduct() {
       <Navbar />
       <BreadCrumb category={product.category} title={product.title} />
 
-      <div className="flex md:flex-row flex-col items-center justify-start gap-10 w-full ">
+      <div className="flex md:flex-row flex-col items-center justify-start gap-4 md:gap-10 w-full ">
 
         {/* IMAGE */}
-        <div className="flex md:flex-row flex-col items-center justify-start gap-10 w-full max-w-7xl mx-auto px-4">
+        <div className="flex md:flex-row flex-col items-center justify-start gap-10  w-full max-w-7xl mx-auto px-4">
           <div className="bg-white rounded-3xl p-6 shadow-sm flex justify-center w-full h-full">
             <img
               src={images[activeImg]}

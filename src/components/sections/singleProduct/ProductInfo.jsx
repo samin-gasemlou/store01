@@ -29,7 +29,7 @@ export default function ProductInfo({ product }) {
     <div className="w-full flex flex-col items-center md:items-start justify-center gap-2">
 
       {/* TITLE */}
-      <h1 className="text-3xl sm:text-4xl font-semibold text-center px-4 md:px-0">
+      <h1 className="md:text-3xl text-[20px] sm:text-4xl font-semibold text-center px-4 md:px-0">
         {product.title}
       </h1>
 
@@ -48,7 +48,7 @@ export default function ProductInfo({ product }) {
       </div>
 
       {/* PRODUCT CODE */}
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-gray-500 ">
         Product Code: {product.code}
       </p>
 

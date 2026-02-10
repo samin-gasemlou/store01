@@ -1,6 +1,7 @@
-export default function Footer() {
+export default function MobileFooter() {
   return (
-    <footer className="w-full hidden md:block rounded-t-3xl bg-[#FFFFFF] pt-24 pb-10 relative">
+    <footer className="w-full bg-transparent md:hidden pt-24 pb-10 relative">
+      <img src="/leaf.svg" className="absolute top-0 left-0" alt="" />
 
       {/* === Top Trapezoid / Capsule Shape === */}
       <div className="absolute md:-top-8 top-0 left-1/2 -translate-x-1/2 z-20">

@@ -13,7 +13,7 @@ export default function HeroSlider() {
   };
 
   return (
-    <div className="w-full md:mt-16 mt-12 px-3 sm:px-4 z-50">
+    <div className="w-full md:mt-16 mt-12 px-3 sm:px-4 z-50 md:z-40">
       <div
         className="
           relative isolate
@@ -46,6 +46,7 @@ export default function HeroSlider() {
         ))}
 
         {/* Buttons */}
+        <div className="flex items-center justify-between w-full z-50"></div>
         <button
           type="button"
           onClick={prevSlide}
@@ -61,8 +62,8 @@ export default function HeroSlider() {
         <button
           type="button"
           onClick={nextSlide}
-          className="absolute right-4 top-1/2 -translate-y-1/2 z-[60]
-                     w-9 h-9 rounded-full bg-white/80
+          className="absolute right-4 top-1/2 -translate-y-1/2
+                     w-9 h-9 rounded-full bg-white/80 z-[60]
                      flex items-center justify-center
                      shadow hover:bg-white transition
                      pointer-events-auto select-none"

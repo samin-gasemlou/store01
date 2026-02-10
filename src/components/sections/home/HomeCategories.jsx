@@ -30,7 +30,7 @@ export default function HomeCategories() {
   };
 
   return (
-    <section className="w-full flex items-center justify-center py-8 md:py-12 bg-transparent sm:mt-8 md:mb-16 relative">
+    <section className="w-full flex items-center justify-center py-8 md:py-12 bg-transparent sm:mt-8 md:mb-16 relative z-50">
       {/* فلش‌ها فقط موبایل */}
       {categories.length > visibleCount && (
         <>
@@ -52,7 +52,7 @@ export default function HomeCategories() {
       <div className="w-full max-w-7xl mx-auto px-4 overflow-hidden">
         <div
           ref={containerRef}
-          className="flex gap-8 transition-transform duration-300 ease-in-out sm:grid sm:grid-cols-3 lg:grid-cols-6"
+          className="flex md:gap-8 gap-3 transition-transform duration-300 ease-in-out sm:grid sm:grid-cols-3 lg:grid-cols-6"
           style={{
             transform: `translateX(-${index * cardWidth}px)`,
           }}
