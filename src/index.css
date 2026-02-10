@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+/* 🔒 ROOT OVERFLOW FIX */
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+body {
+  background-color: #f2f3f5;
+}
+
+/* UTILITIES */
+.clip-trapezoid {
+  clip-path: polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
