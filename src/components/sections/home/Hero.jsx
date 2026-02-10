@@ -31,7 +31,7 @@ export default function HeroSlider() {
           touch-manipulation
         "
       >
-        {/* Slides */}
+        
         {sliderData.map((item, index) => (
           <img
             key={item.id}
