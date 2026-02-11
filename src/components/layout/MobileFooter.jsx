@@ -1,4 +1,8 @@
+import { useTranslation } from "react-i18next";
+
 export default function MobileFooter() {
+  const { t } = useTranslation();
+
   return (
     <footer className="w-full bg-transparent md:hidden pt-24 pb-30 relative">
       <img src="/leaf.svg" className="absolute top-0 left-0" alt="" />
@@ -31,14 +35,10 @@ export default function MobileFooter() {
       {/* CONTENT */}
       <div className="max-w-7xl mx-auto px-6 lg:px-4 pt-20">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-
           {/* LEFT */}
           <div>
             <p className="text-[15px] leading-6 text-gray-700">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-              incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet,
-              consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore
-              et dolore magna aliqua.
+              {t("footer.about")}
             </p>
 
             <div className="flex gap-4 mt-6">
@@ -50,19 +50,31 @@ export default function MobileFooter() {
 
           {/* CENTER */}
           <div>
-            <h3 className="text-[20px] font-semibold mb-4">Quick Access</h3>
+            <h3 className="text-[20px] font-semibold mb-4">
+              {t("footer.quickAccess")}
+            </h3>
 
             <ul className="space-y-2 text-[15px] text-gray-800">
-              <li className="flex items-center gap-2"><span className="text-[#2B4168]">•</span> Store</li>
-              <li className="flex items-center gap-2"><span className="text-[#2B4168]">•</span> Blog</li>
-              <li className="flex items-center gap-2"><span className="text-[#2B4168]">•</span> Contact us</li>
-              <li className="flex items-center gap-2"><span className="text-[#2B4168]">•</span> About us</li>
+              <li className="flex items-center gap-2">
+                <span className="text-[#2B4168]">•</span> {t("footer.store")}
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-[#2B4168]">•</span> {t("footer.blog")}
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-[#2B4168]">•</span> {t("footer.contactUs")}
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-[#2B4168]">•</span> {t("footer.aboutUs")}
+              </li>
             </ul>
           </div>
 
           {/* RIGHT */}
           <div>
-            <h3 className="text-[20px] font-semibold mb-4">Contact</h3>
+            <h3 className="text-[20px] font-semibold mb-4">
+              {t("footer.contact")}
+            </h3>
 
             <div className="flex flex-col gap-3 text-[15px] text-gray-800">
               <div className="flex items-center gap-2">
@@ -75,7 +87,7 @@ export default function MobileFooter() {
 
               <div className="flex items-center gap-2">
                 <img src="/location.svg" className="w-5" />
-                Lorem ipsum dolor sit amet, consectetur
+                {t("footer.address")}
               </div>
             </div>
           </div>
@@ -84,7 +96,8 @@ export default function MobileFooter() {
         <div className="w-full h-px bg-[#F2F3F5] my-10"></div>
 
         <p className="text-center text-[#444444] text-[15px]">
-          Concept & Execution by <span className="text-[#2B4168]"> Amirhosein Ghavidel </span>
+          {t("footer.concept")}{" "}
+          <span className="text-[#2B4168]"> Amirhosein Ghavidel </span>
         </p>
       </div>
     </footer>

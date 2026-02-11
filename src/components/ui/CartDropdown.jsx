@@ -1,6 +1,9 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
-export default function CartDropdown({ open, cartItems, onClose }) {
+export default function CartDropdown({ open, cartItems, onClose, align = "left" }) {
+  const { t } = useTranslation();
+
   if (!open) return null;
 
   const total = cartItems.reduce((sum, item) => {
@@ -11,19 +14,19 @@ export default function CartDropdown({ open, cartItems, onClose }) {
 
   return (
     <div
-      className="
+      className={`
         absolute
-        bottom-14 left-0
+        bottom-14 ${align === "right" ? "right-0" : "left-0"}
         w-[260px]
         bg-white
         rounded-[10px]
         shadow-lg
         p-3
-      "
+      `}
     >
       {cartItems.length === 0 ? (
         <p className="text-[12px] text-gray-500 px-1 py-2">
-          Your cart is empty.
+          {t("cart.empty")}
         </p>
       ) : (
         <>
@@ -41,7 +44,9 @@ export default function CartDropdown({ open, cartItems, onClose }) {
 
                 <div className="flex-1">
                   <p className="text-[13px] leading-5">{item.title}</p>
-                  <p className="text-[12px] text-gray-500">Qty: {item.qty}</p>
+                  <p className="text-[12px] text-gray-500">
+                    {t("cart.qty")}: {item.qty}
+                  </p>
                 </div>
 
                 <p className="text-[12px] font-semibold text-[#2A3E63]">
@@ -52,9 +57,9 @@ export default function CartDropdown({ open, cartItems, onClose }) {
           </div>
 
           <div className="border-t mt-2 pt-2 flex items-center justify-between">
-            <p className="text-[12px] text-gray-600">Total</p>
+            <p className="text-[12px] text-gray-600">{t("cart.total")}</p>
             <p className="text-[13px] font-semibold text-[#2A3E63]">
-              {total.toLocaleString()} Toman
+              {total.toLocaleString()} {t("cart.currency")}
             </p>
           </div>
 
@@ -71,7 +76,7 @@ export default function CartDropdown({ open, cartItems, onClose }) {
                 text-[13px]
               "
             >
-              Payment
+              {t("cart.payment")}
             </Link>
           </div>
         </>

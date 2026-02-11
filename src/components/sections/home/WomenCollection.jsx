@@ -1,7 +1,35 @@
-// WomenCollection.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
 import ProductCard from "../../common/ProductCard";
 import { products } from "../../../data/products";
+import { useTranslation } from "react-i18next";
+
+function getRtlScrollType() {
+  if (typeof document === "undefined") return "default";
+  const div = document.createElement("div");
+  div.dir = "rtl";
+  div.style.width = "100px";
+  div.style.height = "100px";
+  div.style.overflow = "scroll";
+  div.style.position = "absolute";
+  div.style.top = "-9999px";
+
+  const inner = document.createElement("div");
+  inner.style.width = "200px";
+  inner.style.height = "100px";
+  div.appendChild(inner);
+  document.body.appendChild(div);
+
+  div.scrollLeft = 0;
+  const a = div.scrollLeft;
+  div.scrollLeft = 1;
+  const b = div.scrollLeft;
+
+  document.body.removeChild(div);
+
+  if (a > 0) return "reverse";
+  if (b === 0) return "negative";
+  return "default";
+}
 
 export default function WomenCollection({
   items = products,
@@ -10,8 +38,61 @@ export default function WomenCollection({
   desktopStep = 4,
   imageSrc = "/womenn.png",
 }) {
+  const { t, i18n } = useTranslation();
+
   const sliderRef = useRef(null);
   const firstItemRef = useRef(null);
+
+  const lang = (i18n.language || "en").split("-")[0];
+  const isRTL = lang === "ar" || lang === "ku";
+  const rtlTypeRef = useRef(getRtlScrollType());
+
+  const getX = () => {
+    const el = sliderRef.current;
+    if (!el) return 0;
+    if (!isRTL) return el.scrollLeft;
+
+    const max = el.scrollWidth - el.clientWidth;
+    const type = rtlTypeRef.current;
+
+    if (type === "negative") return -el.scrollLeft;
+    if (type === "reverse") return max - el.scrollLeft;
+    return el.scrollLeft;
+  };
+
+  const setX = (x) => {
+    const el = sliderRef.current;
+    if (!el) return;
+    if (!isRTL) {
+      el.scrollLeft = x;
+      return;
+    }
+
+    const max = el.scrollWidth - el.clientWidth;
+    const type = rtlTypeRef.current;
+
+    if (type === "negative") el.scrollLeft = -x;
+    else if (type === "reverse") el.scrollLeft = max - x;
+    else el.scrollLeft = x;
+  };
+
+  const scrollByX = (dx, behavior = "smooth") => {
+    const el = sliderRef.current;
+    if (!el) return;
+    const next = getX() + dx;
+
+    if (!isRTL) el.scrollTo({ left: next, behavior });
+    else {
+      const max = el.scrollWidth - el.clientWidth;
+      const type = rtlTypeRef.current;
+      let raw = next;
+
+      if (type === "negative") raw = -next;
+      else if (type === "reverse") raw = max - next;
+
+      el.scrollTo({ left: raw, behavior });
+    }
+  };
 
   const baseItems = useMemo(() => {
     const arr = Array.isArray(items) ? items.filter(Boolean) : [];
@@ -30,7 +111,7 @@ export default function WomenCollection({
   useEffect(() => {
     const calc = () => {
       if (!firstItemRef.current) return;
-      const cardWidth = firstItemRef.current.offsetWidth + 20; // gap-5 => 20px
+      const cardWidth = firstItemRef.current.offsetWidth + 20;
       setCardStep(cardWidth);
       segmentWidthRef.current = cardWidth * baseItems.length;
     };
@@ -44,14 +125,15 @@ export default function WomenCollection({
     const el = sliderRef.current;
     if (!el || !baseItems.length) return;
 
-    const t = setTimeout(() => {
+    const tmr = setTimeout(() => {
       const seg = segmentWidthRef.current;
       if (!seg) return;
-      el.scrollLeft = seg;
+      setX(seg);
     }, 0);
 
-    return () => clearTimeout(t);
-  }, [baseItems.length]);
+    return () => clearTimeout(tmr);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [baseItems.length, isRTL]);
 
   const onScroll = () => {
     const el = sliderRef.current;
@@ -63,8 +145,9 @@ export default function WomenCollection({
       const seg = segmentWidthRef.current;
       if (!seg) return;
 
-      if (el.scrollLeft < seg * 0.5) el.scrollLeft += seg;
-      else if (el.scrollLeft > seg * 2.5) el.scrollLeft -= seg;
+      const x = getX();
+      if (x < seg * 0.5) setX(x + seg);
+      else if (x > seg * 2.5) setX(x - seg);
     });
   };
 
@@ -74,20 +157,16 @@ export default function WomenCollection({
 
     const step = window.innerWidth < 768 ? mobileStep : desktopStep;
 
-    el.scrollBy({
-      left: direction * cardStep * step,
-      behavior: "smooth",
-    });
+    scrollByX(direction * cardStep * step, "smooth");
   };
 
-  // ✅ Drag حرفه‌ای با threshold (کلیک خراب نشه)
   useEffect(() => {
     const el = sliderRef.current;
     if (!el) return;
 
     let isDown = false;
-    let startX = 0;
-    let startLeft = 0;
+    let startClientX = 0;
+    let startAxis = 0;
     let moved = false;
     const THRESHOLD = 6;
 
@@ -96,19 +175,19 @@ export default function WomenCollection({
 
       isDown = true;
       moved = false;
-      startX = e.clientX;
-      startLeft = el.scrollLeft;
+      startClientX = e.clientX;
+      startAxis = getX();
     };
 
     const onMove = (e) => {
       if (!isDown) return;
 
-      const dx = e.clientX - startX;
+      const dx = e.clientX - startClientX;
 
       if (!moved && Math.abs(dx) > THRESHOLD) moved = true;
       if (!moved) return;
 
-      el.scrollLeft = startLeft - dx;
+      setX(startAxis - dx);
       e.preventDefault();
     };
 
@@ -130,17 +209,19 @@ export default function WomenCollection({
       el.removeEventListener("pointerleave", onUp);
       el.removeEventListener("pointercancel", onUp);
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isRTL]);
 
   return (
     <section className="w-full relative overflow-x-hidden md:mb-20">
       <div className="w-full mx-auto px-2">
         <div className="flex flex-col md:flex-row items-center gap-4">
-          {/* ✅ کارت‌ها سمت چپ */}
           <div className="w-full md:flex-1 relative min-w-0">
             <Header
-              onLeft={() => scrollByStep(-1)}
-              onRight={() => scrollByStep(1)}
+              title={t("home.justLanded")}
+              isRTL={isRTL}
+              onLeft={() => scrollByStep(isRTL ? 1 : -1)}
+              onRight={() => scrollByStep(isRTL ? -1 : 1)}
             />
 
             <div
@@ -165,7 +246,6 @@ export default function WomenCollection({
             </div>
           </div>
 
-          {/* ✅ تصویر سمت راست در دسکتاپ */}
           <ImageBlock imageSrc={imageSrc} />
         </div>
       </div>
@@ -173,17 +253,20 @@ export default function WomenCollection({
   );
 }
 
-function Header({ onLeft, onRight }) {
+function Header({ title, onLeft, onRight, isRTL }) {
+  const leftIcon = isRTL ? "/arrow-circle-left3.svg" : "/arrow-circle-left.svg";
+  const rightIcon = isRTL ? "/arrow-circle-left.svg" : "/arrow-circle-left3.svg";
+
   return (
     <div className="flex w-full items-center justify-between mb-2 pt-4">
-      <h2 className="text-[18px] sm:text-[20px] md:text-[24px]">Just Landed</h2>
+      <h2 className="text-[18px] sm:text-[20px] md:text-[24px]">{title}</h2>
 
-      <div className="flex gap-0 shrink-0">
+      <div className="flex md:gap-2 gap-0 shrink-0">
         <button onClick={onLeft} type="button" className="w-8 h-8">
-          <img src="/arrow-circle-left.svg" className="w-6 md:w-full" alt="" />
+          <img src={leftIcon} className="w-6 md:w-full" alt="" />
         </button>
         <button onClick={onRight} type="button" className="w-8 h-8">
-          <img src="/arrow-circle-left3.svg " className="w-6 md:w-full" alt="" />
+          <img src={rightIcon} className="w-6 md:w-full" alt="" />
         </button>
       </div>
     </div>
@@ -192,7 +275,7 @@ function Header({ onLeft, onRight }) {
 
 function ImageBlock({ imageSrc }) {
   return (
-    <div className="hidden lg:flex shrink-0">
+    <div className="hidden md:flex shrink-0">
       <img
         src={imageSrc}
         className="w-[300px] h-[413px] object-cover rounded-[10px]"

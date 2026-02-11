@@ -1,0 +1,317 @@
+{
+  "categories": {
+    "mensFragrances": "Men’s Fragrances",
+    "womensFragrances": "Women’s Fragrances",
+    "unisexFragrances": "Unisex Fragrances",
+    "giftSets": "Gift Sets",
+    "newArrivals": "New Arrivals",
+
+    "mens-fragrances": "Men’s Fragrances",
+    "womens-fragrances": "Women’s Fragrances",
+    "unisex-fragrances": "Unisex Fragrances",
+    "gift-sets": "Gift Sets",
+    "new-arrivals": "New Arrivals",
+
+    "mens-collection": "Men's Collection",
+    "womens-collection": "Women's Collection"
+  },
+
+  "subCategories": {
+    "mens-collection": {
+      "perfume": "Perfume",
+      "accessories": "Accessories"
+    },
+    "womens-collection": {
+      "perfume": "Perfume",
+      "makeup": "Makeup",
+      "accessories": "Accessories"
+    }
+  },
+
+  "home": {
+    "justLanded": "Just Landed",
+    "mostWanted": "Most Wanted Collection",
+    "followUs": "Don't Miss the Drop! Follow us for Secret Deals.",
+    "specialDiscount": "Special Discount"
+  },
+
+  "timer": {
+    "hours": "Hours",
+    "min": "Min",
+    "sec": "Sec"
+  },
+
+  "footer": {
+    "about": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    "quickAccess": "Quick Access",
+    "store": "Store",
+    "blog": "Blog",
+    "contactUs": "Contact us",
+    "aboutUs": "About us",
+    "contact": "Contact",
+    "address": "Lorem ipsum dolor sit amet, consectetur",
+    "concept": "Concept & Execution by"
+  },
+
+  "nav": {
+    "home": "Home",
+    "store": "Store",
+    "contact": "Contact us",
+    "account": "Account",
+    "products": "Products"
+  },
+
+  "lang": {
+    "en": "English",
+    "ar": "Arabic",
+    "ku": "Kurdish"
+  },
+
+  "mobileNav": {
+    "home": "Home",
+    "search": "Search",
+    "cart": "Cart",
+    "account": "Account",
+    "categories": "Categories",
+    "searchPlaceholder": "Search for products...",
+    "go": "Go"
+  },
+
+  "cart": {
+    "empty": "Your cart is empty.",
+    "qty": "Qty",
+    "total": "Subtotal",
+    "payment": "Payment",
+    "currency": "Toman"
+  },
+
+  "layout": {
+    "freeShipping": "Free shipping for purchasing more than two items all over Iraq"
+  },
+
+  "pagination": {
+    "prev": "Previous",
+    "next": "Next"
+  },
+
+  "checkout": {
+    "yourOrder": "Your Order",
+    "product": "Product",
+    "subtotal": "Subtotal",
+    "total": "Total",
+    "billingDetails": "Billing Details",
+
+    "firstName": "First name *",
+    "lastName": "Last name *",
+    "company": "Company name (optional)",
+    "countryValue": "Iran",
+    "address": "Street address *",
+    "city": "City *",
+    "province": "Province *",
+    "provinceDefault": "Tehran",
+    "postalCode": "Postal code *",
+    "phone": "Phone *",
+    "email": "Email address *",
+    "note": "Order notes (optional)",
+
+    "placeOrder": "Place Order",
+    "alertEmptyCart": "Your cart is empty!",
+    "alertSubmitted": "Order submitted (demo)",
+
+    "shipping": {
+      "chapaar": "Chapaar (Recommended)",
+      "post": "Post",
+      "tipax": "Tipax",
+      "cargo": "Cargo",
+      "bus": "Bus Delivery"
+    }
+  },
+
+  "cartPage": {
+    "product": "Product",
+    "price": "Price",
+    "quantity": "Quantity",
+    "subtotal": "Subtotal",
+
+    "discountCode": "Discount code",
+    "applyCoupon": "Apply Coupon",
+    "updateCart": "Update Cart",
+
+    "cartTotals": "Cart Totals",
+    "proceedToCheckout": "Proceed to Checkout",
+
+    "remove": "Remove item",
+    "inc": "Increase quantity",
+    "dec": "Decrease quantity",
+
+    "shipping": {
+      "chapaar": "Chapaar (Recommended)",
+      "post": "Post",
+      "tipax": "Tipax",
+      "cargo": "Cargo",
+      "bus": "Bus Delivery"
+    }
+  },
+
+  "contact": {
+    "alertSent": "Message sent (demo)",
+
+    "form": {
+      "title": "Send us a message",
+      "nameLabel": "Name",
+      "namePlaceholder": "Your name",
+      "phoneLabel": "Phone number",
+      "phonePlaceholder": "Your phone number",
+      "messageLabel": "Message",
+      "messagePlaceholder": "Write your message",
+      "sendButton": "Send Message"
+    },
+
+    "info": {
+      "title": "Contact Us",
+      "brand": "Foulad Arsan Amol",
+      "desc": "At {{brand}}, we deeply understand the challenges of time, cost, and safety in the construction industry. Using modern technology and local expertise, our products are designed to help you build faster, safer, and more efficiently.",
+      "addressTitle": "Office Address:",
+      "address": "Amol, Emam Reza St, Motahari Blvd, Near Square 30"
+    },
+
+    "channels": {
+      "instagram": "Instagram",
+      "whatsapp": "WhatsApp",
+      "emailValue": "info@example.com",
+      "phone1": "+98 11 3338 8056",
+      "phone2": "+98 911 003 0791"
+    }
+  },
+
+  "account": {
+    "title": "My Account",
+    "alertProfileUpdated": "Profile updated successfully",
+    "alertPasswordChanged": "Password changed successfully",
+    "alertLoggedOut": "Logged out",
+    "logout": "Logout",
+    "profile": {
+      "title": "Profile Information",
+      "fullName": "Full Name",
+      "email": "Email",
+      "save": "Save Changes"
+    },
+    "password": {
+      "title": "Change Password",
+      "current": "Current Password",
+      "new": "New Password",
+      "update": "Update Password"
+    },
+    "orders": {
+      "title": "My Orders",
+      "empty": "You haven't placed any orders yet."
+    }
+  },
+
+  "search": {
+    "title": "Search Products",
+    "placeholder": "Search for products...",
+    "noResults": "No products found."
+  },
+
+  "products": {
+    "1": { "description": "A bold and fresh fragrance with notes of bergamot and amber." },
+    "2": { "description": "Elegant and timeless scent combining citrus, woods, and incense." },
+    "3": { "description": "A modern aromatic fragrance with a clean and masculine touch." },
+    "4": { "description": "Powerful and seductive perfume inspired by Greek mythology." },
+    "5": { "description": "Fresh aquatic fragrance with a light and natural feeling." },
+    "6": { "description": "Premium leather wallet with a slim and elegant design." },
+    "7": { "description": "Classic wrist watch crafted with precision and style." },
+    "8": { "description": "Timeless sunglasses offering UV protection and comfort." },
+    "9": { "description": "Minimal bracelet designed for everyday wear." },
+    "10": { "description": "Durable leather belt suitable for formal and casual outfits." },
+    "11": { "description": "A sophisticated fragrance with floral and citrus notes." },
+    "12": { "description": "Luxurious floral scent symbolizing elegance and femininity." },
+    "13": { "description": "A bold floral fragrance blending lavender and vanilla." },
+    "14": { "description": "Sweet and warm perfume celebrating joy and beauty." },
+    "15": { "description": "Rich floral scent inspired by blooming gardens." }
+  },
+
+  "single": {
+    "notFound": "Product Not Found",
+    "addedToCart": "Product added to cart",
+    "productCode": "Product Code",
+
+    "reviewsTitle": "Reviews",
+    "reviews": "Reviews ({{count}})",
+
+    "qty": "Qty",
+    "size": "Size",
+    "inc": "Increase quantity",
+    "dec": "Decrease quantity",
+
+    "addToCart": "ADD TO CART",
+    "buyNow": "BUY NOW",
+
+    "related": "Related products",
+
+    "tabs": {
+      "description": "Description",
+      "specifications": "Specifications",
+      "reviews": "Reviews",
+      "specTitle": "Specifications"
+    },
+
+    "specs": {
+      "notes": "Fragrance Notes",
+      "notesValue": "Top Notes",
+      "longevity": "Longevity",
+      "longevityValue": "Moderate",
+      "projection": "Projection",
+      "projectionValue": "Strong",
+      "season": "Best Season",
+      "seasonValue": "Summer / Winter"
+    },
+
+    "reviewSort": {
+      "label": "Sort by",
+      "newest": "Newest",
+      "highest": "Highest rating"
+    },
+
+    "reactions": {
+      "like": "Like",
+      "dislike": "Dislike"
+    },
+
+    "addReview": {
+      "rating": "Rating",
+      "setRating": "Set rating {{value}}",
+      "comments": "Your Comments",
+      "commentsPlaceholder": "Write your comment...",
+      "name": "Name",
+      "namePlaceholder": "Your name",
+      "email": "Email",
+      "emailPlaceholder": "Your email",
+      "submit": "Submit"
+    },
+
+    "demoReviews": {
+      "1": {
+        "name": "Alisa",
+        "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit..."
+      },
+      "2": {
+        "name": "Alisa",
+        "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit..."
+      }
+    },
+
+    "sizeOptions": {
+      "50": "50 ml",
+      "90": "90 ml",
+      "120": "120 ml"
+    },
+
+    "features": {
+      "fastShipping": "Fast shipping",
+      "quality": "Quality assurance",
+      "support": "Online support"
+    }
+  }
+}

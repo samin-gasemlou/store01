@@ -4,15 +4,17 @@ import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import ProductCard from "../components/common/ProductCard";
 import { products } from "../data/products";
+import { useTranslation } from "react-i18next";
 
 export default function SearchPage() {
+  const { t } = useTranslation();
+
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const initialQuery = params.get("q") || "";
 
   const [query, setQuery] = useState(initialQuery);
 
-  // وقتی URL عوض شد (مثلاً سرچ جدید)، state هم آپدیت بشه
   useEffect(() => {
     setQuery(initialQuery);
   }, [initialQuery]);
@@ -28,7 +30,7 @@ export default function SearchPage() {
       {/* SEARCH HEADER */}
       <div className="w-full px-2 mt-10 lg:block hidden">
         <h1 className="text-xl font-semibold text-center mb-6">
-          Search Products
+          {t("search.title")}
         </h1>
 
         {/* SEARCH INPUT */}
@@ -37,18 +39,16 @@ export default function SearchPage() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search for products..."
+            placeholder={t("search.placeholder")}
             className="w-full border rounded-xl px-5 py-3 text-sm outline-none"
           />
         </div>
       </div>
 
       {/* RESULTS */}
-      <div className="w-full  px-4 md:mt-10 mt-20 mb-20">
+      <div className="w-full px-4 md:mt-10 mt-20 mb-20">
         {filteredProducts.length === 0 ? (
-          <p className="text-center text-gray-500">
-            No products found.
-          </p>
+          <p className="text-center text-gray-500">{t("search.noResults")}</p>
         ) : (
           <div
             className="

@@ -1,0 +1,317 @@
+{
+  "categories": {
+    "mensFragrances": "عطور رجالية",
+    "womensFragrances": "عطور نسائية",
+    "unisexFragrances": "عطور للجنسين",
+    "giftSets": "مجموعات هدايا",
+    "newArrivals": "وصل حديثاً",
+
+    "mens-fragrances": "عطور رجالية",
+    "womens-fragrances": "عطور نسائية",
+    "unisex-fragrances": "عطور للجنسين",
+    "gift-sets": "مجموعات هدايا",
+    "new-arrivals": "وصل حديثاً",
+
+    "mens-collection": "مجموعة الرجال",
+    "womens-collection": "مجموعة النساء"
+  },
+
+  "subCategories": {
+    "mens-collection": {
+      "perfume": "عطر",
+      "accessories": "إكسسوارات"
+    },
+    "womens-collection": {
+      "perfume": "عطر",
+      "makeup": "مكياج",
+      "accessories": "إكسسوارات"
+    }
+  },
+
+  "home": {
+    "justLanded": "وصلنا للتو",
+    "mostWanted": "مجموعة الأكثر طلباً",
+    "followUs": "لا تفوّت العروض! تابعنا لصفقات سرّية.",
+    "specialDiscount": "خصم خاص"
+  },
+
+  "timer": {
+    "hours": "ساعات",
+    "min": "دقائق",
+    "sec": "ثواني"
+  },
+
+  "footer": {
+    "about": "نص تعريفي تجريبي...",
+    "quickAccess": "روابط سريعة",
+    "store": "المتجر",
+    "blog": "المدونة",
+    "contactUs": "اتصل بنا",
+    "aboutUs": "من نحن",
+    "contact": "تواصل",
+    "address": "نص تجريبي للعنوان",
+    "concept": "التصميم والتنفيذ بواسطة"
+  },
+
+  "nav": {
+    "home": "الرئيسية",
+    "store": "المتجر",
+    "contact": "اتصل بنا",
+    "account": "الحساب",
+    "products": "المنتجات"
+  },
+
+  "lang": {
+    "en": "الإنجليزية",
+    "ar": "العربية",
+    "ku": "الكردية"
+  },
+
+  "mobileNav": {
+    "home": "الرئيسية",
+    "search": "بحث",
+    "cart": "السلة",
+    "account": "الحساب",
+    "categories": "الفئات",
+    "searchPlaceholder": "ابحث عن منتجات...",
+    "go": "اذهب"
+  },
+
+  "cart": {
+    "empty": "سلتك فارغة.",
+    "qty": "الكمية",
+    "total": "المجموع الفرعي",
+    "payment": "الدفع",
+    "currency": "تومان"
+  },
+
+  "layout": {
+    "freeShipping": "شحن مجاني عند شراء أكثر من قطعتين داخل العراق"
+  },
+
+  "pagination": {
+    "prev": "السابق",
+    "next": "التالي"
+  },
+
+  "checkout": {
+    "yourOrder": "طلبك",
+    "product": "المنتج",
+    "subtotal": "المجموع الفرعي",
+    "total": "الإجمالي",
+    "billingDetails": "بيانات الفاتورة",
+
+    "firstName": "الاسم الأول *",
+    "lastName": "اسم العائلة *",
+    "company": "اسم الشركة (اختياري)",
+    "countryValue": "إيران",
+    "address": "عنوان الشارع *",
+    "city": "المدينة *",
+    "province": "المحافظة *",
+    "provinceDefault": "طهران",
+    "postalCode": "الرمز البريدي *",
+    "phone": "الهاتف *",
+    "email": "البريد الإلكتروني *",
+    "note": "ملاحظات الطلب (اختياري)",
+
+    "placeOrder": "تأكيد الطلب",
+    "alertEmptyCart": "سلتك فارغة!",
+    "alertSubmitted": "تم إرسال الطلب (تجريبي)",
+
+    "shipping": {
+      "chapaar": "چاپار (موصى به)",
+      "post": "البريد",
+      "tipax": "تيباكس",
+      "cargo": "كارغو",
+      "bus": "توصيل بالباص"
+    }
+  },
+
+  "cartPage": {
+    "product": "المنتج",
+    "price": "السعر",
+    "quantity": "الكمية",
+    "subtotal": "المجموع الفرعي",
+
+    "discountCode": "كود الخصم",
+    "applyCoupon": "تطبيق القسيمة",
+    "updateCart": "تحديث السلة",
+
+    "cartTotals": "إجمالي السلة",
+    "proceedToCheckout": "المتابعة للدفع",
+
+    "remove": "حذف المنتج",
+    "inc": "زيادة الكمية",
+    "dec": "تقليل الكمية",
+
+    "shipping": {
+      "chapaar": "چاپار (موصى به)",
+      "post": "البريد",
+      "tipax": "تيباكس",
+      "cargo": "كارغو",
+      "bus": "توصيل بالباص"
+    }
+  },
+
+  "contact": {
+    "alertSent": "تم إرسال الرسالة (تجريبي)",
+
+    "form": {
+      "title": "أرسل لنا رسالة",
+      "nameLabel": "الاسم",
+      "namePlaceholder": "اسمك",
+      "phoneLabel": "رقم الهاتف",
+      "phonePlaceholder": "رقم هاتفك",
+      "messageLabel": "الرسالة",
+      "messagePlaceholder": "اكتب رسالتك",
+      "sendButton": "إرسال الرسالة"
+    },
+
+    "info": {
+      "title": "اتصل بنا",
+      "brand": "Foulad Arsan Amol",
+      "desc": "في {{brand}}، نفهم تحديات الوقت والتكلفة والسلامة في قطاع البناء. باستخدام التكنولوجيا الحديثة والخبرة المحلية، صُممت منتجاتنا لتساعدك على البناء بشكل أسرع وأكثر أماناً وكفاءة.",
+      "addressTitle": "عنوان المكتب:",
+      "address": "آمل، شارع الإمام رضا، بوليفارد مطهري، قرب ساحة 30"
+    },
+
+    "channels": {
+      "instagram": "إنستغرام",
+      "whatsapp": "واتساب",
+      "emailValue": "info@example.com",
+      "phone1": "+98 11 3338 8056",
+      "phone2": "+98 911 003 0791"
+    }
+  },
+
+  "account": {
+    "title": "حسابي",
+    "alertProfileUpdated": "تم تحديث الملف الشخصي بنجاح",
+    "alertPasswordChanged": "تم تغيير كلمة المرور بنجاح",
+    "alertLoggedOut": "تم تسجيل الخروج",
+    "logout": "تسجيل الخروج",
+    "profile": {
+      "title": "معلومات الملف الشخصي",
+      "fullName": "الاسم الكامل",
+      "email": "البريد الإلكتروني",
+      "save": "حفظ التغييرات"
+    },
+    "password": {
+      "title": "تغيير كلمة المرور",
+      "current": "كلمة المرور الحالية",
+      "new": "كلمة المرور الجديدة",
+      "update": "تحديث كلمة المرور"
+    },
+    "orders": {
+      "title": "طلباتي",
+      "empty": "لم تقم بأي طلب بعد."
+    }
+  },
+
+  "search": {
+    "title": "بحث عن المنتجات",
+    "placeholder": "ابحث عن منتجات...",
+    "noResults": "لا توجد نتائج."
+  },
+
+  "products": {
+    "1": { "description": "عطر جريء ومنعش بنفحات البرغموت والعنبر." },
+    "2": { "description": "رائحة أنيقة وخالدة تجمع بين الحمضيات والأخشاب والبخور." },
+    "3": { "description": "عطر عطري حديث بلمسة نظيفة ورجولية." },
+    "4": { "description": "عطر قوي وجذاب مستوحى من الأساطير اليونانية." },
+    "5": { "description": "عطر مائي منعش بإحساس خفيف وطبيعي." },
+    "6": { "description": "محفظة جلدية فاخرة بتصميم نحيف وأنيق." },
+    "7": { "description": "ساعة يد كلاسيكية مصنوعة بدقة وأناقة." },
+    "8": { "description": "نظارات شمسية كلاسيكية مع حماية من الأشعة فوق البنفسجية." },
+    "9": { "description": "سوار رجالي بسيط للاستخدام اليومي." },
+    "10": { "description": "حزام جلدي متين مناسب للإطلالات الرسمية والكاجوال." },
+    "11": { "description": "عطر راقٍ بنفحات زهرية وحمضية." },
+    "12": { "description": "عطر زهري فاخر يرمز للأناقة والأنوثة." },
+    "13": { "description": "عطر زهري جريء يمزج اللافندر مع الفانيليا." },
+    "14": { "description": "عطر حلو ودافئ يحتفي بالفرح والجمال." },
+    "15": { "description": "عطر زهري غني مستوحى من الحدائق المتفتحة." }
+  },
+
+  "single": {
+    "notFound": "المنتج غير موجود",
+    "addedToCart": "تمت إضافة المنتج إلى السلة",
+    "productCode": "رمز المنتج",
+
+    "reviewsTitle": "التقييمات",
+    "reviews": "التقييمات ({{count}})",
+
+    "qty": "الكمية",
+    "size": "الحجم",
+    "inc": "زيادة الكمية",
+    "dec": "تقليل الكمية",
+
+    "addToCart": "أضف إلى السلة",
+    "buyNow": "اشترِ الآن",
+
+    "related": "منتجات مشابهة",
+
+    "tabs": {
+      "description": "الوصف",
+      "specifications": "المواصفات",
+      "reviews": "التقييمات",
+      "specTitle": "المواصفات"
+    },
+
+    "specs": {
+      "notes": "نوتات العطر",
+      "notesValue": "النوتات العليا",
+      "longevity": "الثبات",
+      "longevityValue": "متوسط",
+      "projection": "الفوحان",
+      "projectionValue": "قوي",
+      "season": "أفضل موسم",
+      "seasonValue": "صيف / شتاء"
+    },
+
+    "reviewSort": {
+      "label": "ترتيب حسب",
+      "newest": "الأحدث",
+      "highest": "الأعلى تقييماً"
+    },
+
+    "reactions": {
+      "like": "أعجبني",
+      "dislike": "لم يعجبني"
+    },
+
+    "addReview": {
+      "rating": "التقييم",
+      "setRating": "تعيين تقييم {{value}}",
+      "comments": "تعليقك",
+      "commentsPlaceholder": "اكتب تعليقك...",
+      "name": "الاسم",
+      "namePlaceholder": "اسمك",
+      "email": "البريد الإلكتروني",
+      "emailPlaceholder": "بريدك الإلكتروني",
+      "submit": "إرسال"
+    },
+
+    "demoReviews": {
+      "1": {
+        "name": "أليسا",
+        "text": "نص تجريبي للتعليق..."
+      },
+      "2": {
+        "name": "أليسا",
+        "text": "نص تجريبي للتعليق..."
+      }
+    },
+
+    "sizeOptions": {
+      "50": "50 مل",
+      "90": "90 مل",
+      "120": "120 مل"
+    },
+
+    "features": {
+      "fastShipping": "شحن سريع",
+      "quality": "ضمان الجودة",
+      "support": "دعم أونلاين"
+    }
+  }
+}

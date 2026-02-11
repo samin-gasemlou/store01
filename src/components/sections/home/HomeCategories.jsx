@@ -3,8 +3,11 @@ import CategoryCard from "./CategoryCard";
 import { categories } from "./data";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function HomeCategories() {
+  const { t } = useTranslation();
+
   const trackRef = useRef(null);
   const itemRefs = useRef([]);
 
@@ -126,7 +129,7 @@ export default function HomeCategories() {
           {categories.map((item, i) => (
             <Link
               key={item.id}
-              to={`/store/${encodeURIComponent(item.title)}`}
+              to={`/store/${encodeURIComponent(item.slug)}`}
               ref={(el) => (itemRefs.current[i] = el)}
               className="
                 shrink-0
@@ -134,7 +137,7 @@ export default function HomeCategories() {
                 w-[calc((100%-12px)/3)]
               "
             >
-              <CategoryCard {...item} />
+              <CategoryCard title={t(item.titleKey)} img={item.img} />
             </Link>
           ))}
         </div>
@@ -154,10 +157,10 @@ export default function HomeCategories() {
           {categories.map((item) => (
             <Link
               key={item.id}
-              to={`/store/${encodeURIComponent(item.title)}`}
+              to={`/store/${encodeURIComponent(item.slug)}`}
               className="w-full"
             >
-              <CategoryCard {...item} />
+              <CategoryCard title={t(item.titleKey)} img={item.img} />
             </Link>
           ))}
         </div>

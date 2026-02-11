@@ -1,25 +1,31 @@
+import { useTranslation } from "react-i18next";
+
 export default function BannerSection() {
+  const { t } = useTranslation();
+
   return (
     <section className="w-full relative md:mt-24 md:mb-26 mt-8 mb-0">
-
-      <div className="
+      <div
+        className="
         w-full h-full 
         flex flex-col md:flex-row 
         items-center md:items-start 
         justify-between 
         relative
-      ">
-
+      "
+      >
         {/* LEFT IMAGE + ORANGE BOX */}
-        <div className="
+        <div
+          className="
           relative 
           w-full md:w-1/2 
           flex justify-center md:justify-start 
           mt-20 md:mt-0
-        ">
-
+        "
+        >
           {/* Orange BG */}
-          <div className="
+          <div
+            className="
             absolute bg-[#2B4168]
     md:w-[700px] w-[350px] h-[230px]
     rounded-br-3xl rounded-tr-3xl
@@ -27,11 +33,11 @@ export default function BannerSection() {
     -translate-x-1/2 md:translate-x-0
     z-10
      md:block
-          "></div>
-
+          "
+          ></div>
 
           {/* Main Image */}
-          <img 
+          <img
             src="./insta.svg"
             alt="Perfume"
             className="
@@ -45,29 +51,23 @@ export default function BannerSection() {
         </div>
 
         {/* RIGHT TEXT */}
-        <div className="
+        <div
+          className="
           w-full md:w-1/2 
           h-[200px] 
           flex flex-col items-center
           justify-center 
           mt-80 md:mt-16
           relative  
-        ">
-
+        "
+        >
           {/* Right Pattern */}
-          <img 
-            src="/s.png"
-            alt=""
-            className="
-              w-[190px] 
-            "
-          />
+          <img src="/s.png" alt="" className="w-[190px]" />
 
           <p className="text-gray-600 mt-4 text-sm sm:text-base text-center md:text-left">
-            Don't Miss the Drop! Follow us for Secret Deals.
+            {t("home.followUs")}
           </p>
         </div>
-
       </div>
     </section>
   );

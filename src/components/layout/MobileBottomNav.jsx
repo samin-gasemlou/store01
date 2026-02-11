@@ -4,8 +4,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { categories } from "../../data/categories";
 import { products } from "../../data/products";
 import CartDropdown from "../ui/CartDropdown";
+import { useTranslation } from "react-i18next";
 
 export default function MobileBottomNav() {
+  const { t, i18n } = useTranslation();
+
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -80,10 +83,8 @@ export default function MobileBottomNav() {
 
   const isActive = (path) => location.pathname === path;
 
-  // ✅ اینجا return null کاملاً درست
   if (isAuthPage) return null;
 
-  // ✅ اندازه‌ها رو یکدست کن
   const BTN = "w-11 h-11";
   const ICON = 22;
 
@@ -94,22 +95,19 @@ export default function MobileBottomNav() {
     ${active ? "bg-[#2A3E63] text-white" : "text-black"}
   `;
 
+  // ✅ RTL (برای ar و ku)
+  const lang = (i18n.language || "en").split("-")[0];
+  const isRTL = lang === "ar" || lang === "ku";
+
   return (
     <nav
       className="
-        fixed  bottom-0 z-50 lg:hidden w-full flex items-center justify-center
+        fixed bottom-0 z-50 lg:hidden w-full flex items-center justify-center
         pb-[max(env(safe-area-inset-bottom),12px)]
       "
     >
       <div className="w-full px-4 flex items-center justify-center">
-        {/* ✅ هم‌عرض بقیه سکشن‌ها + وسط‌چین واقعی */}
-        <div
-          className="
-            mx-auto
-            max-w-7xl
-            flex justify-center
-          "
-        >
+        <div className="mx-auto max-w-7xl flex justify-center">
           <div
             className="
               relative
@@ -133,7 +131,7 @@ export default function MobileBottomNav() {
                   setCartOpen((v) => !v);
                 }}
                 className={btnClass(cartOpen)}
-                aria-label="cart"
+                aria-label={t("mobileNav.cart")}
               >
                 <ShoppingCart size={ICON} />
               </button>
@@ -142,6 +140,7 @@ export default function MobileBottomNav() {
                 open={cartOpen}
                 cartItems={cartItems}
                 onClose={() => setCartOpen(false)}
+                align={isRTL ? "right" : "left"}   // ✅ اینجا جهت رو میدیم
               />
             </div>
 
@@ -155,14 +154,14 @@ export default function MobileBottomNav() {
                   setSearchOpen((v) => !v);
                 }}
                 className={btnClass(searchOpen)}
-                aria-label="search"
+                aria-label={t("mobileNav.search")}
               >
                 <Search size={ICON} />
               </button>
 
               <div
                 className={`
-                  absolute bottom-14 left-20 -translate-x-1/2
+                  absolute bottom-14 ${isRTL ? "right-20 translate-x-1/2" : "left-20 -translate-x-1/2"}
                   w-[260px] bg-white rounded-[10px] shadow-lg p-3
                   transition-all duration-200
                   ${
@@ -176,14 +175,14 @@ export default function MobileBottomNav() {
                   <input
                     value={q}
                     onChange={(e) => setQ(e.target.value)}
-                    placeholder="Search for products..."
+                    placeholder={t("mobileNav.searchPlaceholder")}
                     className="w-full border rounded-xl px-3 py-2 text-sm outline-none"
                   />
                   <button
                     type="submit"
                     className="px-3 py-2 rounded-xl bg-[#2A3E63] text-white text-sm"
                   >
-                    Go
+                    {t("mobileNav.go")}
                   </button>
                 </form>
 
@@ -197,7 +196,7 @@ export default function MobileBottomNav() {
                           navigate(`/search?q=${encodeURIComponent(q.trim())}`);
                         }}
                         type="button"
-                        className="block w-full text-left text-[13px] px-2 py-2 rounded-lg hover:bg-gray-50"
+                        className={`block w-full ${isRTL ? "text-right" : "text-left"} text-[13px] px-2 py-2 rounded-lg hover:bg-gray-50`}
                       >
                         {p.title}
                       </button>
@@ -207,12 +206,12 @@ export default function MobileBottomNav() {
               </div>
             </div>
 
-            {/* Home (هم‌اندازه بقیه + بک‌گراند یکسان) */}
+            {/* Home */}
             <Link
               to="/"
               onClick={closeAll}
               className={btnClass(isActive("/"))}
-              aria-label="home"
+              aria-label={t("mobileNav.home")}
             >
               <Home size={ICON} />
             </Link>
@@ -222,7 +221,7 @@ export default function MobileBottomNav() {
               to="/account"
               onClick={closeAll}
               className={btnClass(isActive("/account"))}
-              aria-label="account"
+              aria-label={t("mobileNav.account")}
             >
               <User size={ICON} />
             </Link>
@@ -237,14 +236,14 @@ export default function MobileBottomNav() {
                   setMenuOpen((v) => !v);
                 }}
                 className={btnClass(menuOpen)}
-                aria-label="categories"
+                aria-label={t("mobileNav.categories")}
               >
                 <Menu size={ICON} />
               </button>
 
               <div
                 className={`
-                  absolute bottom-14 right-0
+                  absolute bottom-14 ${isRTL ? "left-0" : "right-0"}
                   w-[220px] text-[13px]
                   bg-white rounded-[10px] shadow-lg p-3
                   transition-all duration-200
@@ -262,7 +261,7 @@ export default function MobileBottomNav() {
                     onClick={() => setMenuOpen(false)}
                     className="block py-2"
                   >
-                    {cat.title}
+                    {t(`categories.${cat.slug}`, { defaultValue: cat.title })}
                   </Link>
                 ))}
               </div>

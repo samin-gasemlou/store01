@@ -2,12 +2,102 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import ProductCard from "../../common/ProductCard";
 import { products } from "../../../data/products";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
+
+/**
+ * ✅ RTL-safe scroll helpers (بدون دست زدن به استایل)
+ * نرمال‌سازی scrollLeft تا همیشه مثل LTR رفتار کنیم (۰ = چپ‌ترین، max = راست‌ترین)
+ */
+function detectRtlScrollType() {
+  if (typeof document === "undefined") return "reverse";
+
+  const el = document.createElement("div");
+  el.dir = "rtl";
+  el.style.width = "100px";
+  el.style.height = "100px";
+  el.style.overflow = "scroll";
+  el.style.position = "absolute";
+  el.style.top = "-9999px";
+  el.style.left = "-9999px";
+
+  const inner = document.createElement("div");
+  inner.style.width = "200px";
+  inner.style.height = "1px";
+  el.appendChild(inner);
+
+  document.body.appendChild(el);
+
+  // reverse (Chrome/Edge): scrollLeft starts > 0
+  if (el.scrollLeft > 0) {
+    document.body.removeChild(el);
+    return "reverse";
+  }
+
+  // try set 1:
+  el.scrollLeft = 1;
+
+  // negative (Firefox): stays 0 after setting 1
+  if (el.scrollLeft === 0) {
+    document.body.removeChild(el);
+    return "negative";
+  }
+
+  // default (Safari): becomes 1
+  document.body.removeChild(el);
+  return "default";
+}
+
+const RTL_SCROLL_TYPE =
+  typeof window !== "undefined" ? detectRtlScrollType() : "reverse";
+
+function getMaxScrollLeft(el) {
+  return Math.max(0, el.scrollWidth - el.clientWidth);
+}
+
+function getNormalizedScrollLeft(el, isRTL) {
+  const max = getMaxScrollLeft(el);
+  if (!isRTL) return el.scrollLeft;
+
+  if (RTL_SCROLL_TYPE === "negative") {
+    // Firefox: rightmost 0, leftmost -max
+    return el.scrollLeft + max;
+  }
+  if (RTL_SCROLL_TYPE === "default") {
+    // Safari: rightmost 0, leftmost max
+    return max - el.scrollLeft;
+  }
+  // Chrome/Edge reverse: leftmost 0, rightmost max
+  return el.scrollLeft;
+}
+
+function toNativeScrollLeft(el, normalizedLeft, isRTL) {
+  const max = getMaxScrollLeft(el);
+  const n = Math.min(max, Math.max(0, normalizedLeft));
+
+  if (!isRTL) return n;
+
+  if (RTL_SCROLL_TYPE === "negative") return n - max;
+  if (RTL_SCROLL_TYPE === "default") return max - n;
+  return n; // reverse
+}
+
+function scrollToNormalized(el, normalizedLeft, isRTL, behavior = "auto") {
+  el.scrollTo({
+    left: toNativeScrollLeft(el, normalizedLeft, isRTL),
+    behavior,
+  });
+}
 
 export default function DiscountSection() {
+  const { t, i18n } = useTranslation();
+
+  // ✅ مهم: کوردی رو RTL حساب کن (به i18n.dir() اعتماد نکن)
+  const lang = (i18n.language || "en").split("-")[0];
+  const isRTL = lang === "ar" || lang === "ku";
+
   const sliderRef = useRef(null);
   const firstItemRef = useRef(null);
 
-  // ---------------- TIMER ----------------
   const deadline = useMemo(() => {
     const d = new Date();
     d.setHours(23, 59, 59, 999);
@@ -34,7 +124,6 @@ export default function DiscountSection() {
     };
   }, [remaining]);
 
-  // ---------------- LOOP DATA ----------------
   const baseItems = useMemo(() => products.filter(Boolean), []);
   const loopItems = useMemo(() => {
     if (!baseItems.length) return [];
@@ -53,18 +142,15 @@ export default function DiscountSection() {
   const rafRef = useRef(null);
   const snapTimerRef = useRef(null);
 
-  // ✅ برای لوپ نامحسوس
   const isJumpingRef = useRef(false);
 
-  // ✅ برای drag گروهی
   const isPointerDownRef = useRef(false);
   const startXRef = useRef(0);
-  const startLeftRef = useRef(0);
+  const startNormLeftRef = useRef(0);
   const movedRef = useRef(false);
   const lastXRef = useRef(0);
   const lastTRef = useRef(0);
 
-  // ---------------- MEASURE ----------------
   useEffect(() => {
     const calc = () => {
       if (!firstItemRef.current) return;
@@ -79,7 +165,7 @@ export default function DiscountSection() {
     return () => window.removeEventListener("resize", calc);
   }, [baseItems.length]);
 
-  // ---------------- START FROM MIDDLE ----------------
+  // ✅ شروع از وسط (RTL-safe)
   useEffect(() => {
     const el = sliderRef.current;
     if (!el || !cardStep || !baseItems.length) return;
@@ -87,23 +173,24 @@ export default function DiscountSection() {
     const seg = segmentWidthRef.current;
     const groupStep = getVisibleCount() * cardStep;
 
-    el.scrollLeft = seg;
-    el.scrollLeft = Math.round(el.scrollLeft / groupStep) * groupStep;
-  }, [cardStep, baseItems.length]);
+    const mid = seg;
+    const snapped = Math.round(mid / groupStep) * groupStep;
 
-  // ---------------- GROUP SNAP ----------------
+    scrollToNormalized(el, snapped, isRTL, "auto");
+  }, [cardStep, baseItems.length, isRTL]);
+
   const snapToGroup = (behavior = "smooth") => {
     const el = sliderRef.current;
     if (!el || !cardStep) return;
 
     const groupStep = getVisibleCount() * cardStep;
-    const newPos = Math.round(el.scrollLeft / groupStep) * groupStep;
+    const norm = getNormalizedScrollLeft(el, isRTL);
+    const newNorm = Math.round(norm / groupStep) * groupStep;
 
-    el.scrollTo({ left: newPos, behavior });
+    scrollToNormalized(el, newNorm, isRTL, behavior);
   };
 
-  // ✅ لوپ نامحسوس: snap & smooth موقتاً خاموش
-  const seamlessJump = (newScrollLeft) => {
+  const seamlessJump = (newNorm) => {
     const el = sliderRef.current;
     if (!el) return;
 
@@ -116,7 +203,7 @@ export default function DiscountSection() {
     el.style.scrollBehavior = "auto";
 
     requestAnimationFrame(() => {
-      el.scrollLeft = newScrollLeft;
+      el.scrollLeft = toNativeScrollLeft(el, newNorm, isRTL);
 
       requestAnimationFrame(() => {
         el.style.scrollSnapType = prevSnap || "";
@@ -126,7 +213,6 @@ export default function DiscountSection() {
     });
   };
 
-  // ---------------- INFINITE LOOP + schedule group snap ----------------
   const onScroll = () => {
     const el = sliderRef.current;
     if (!el || !baseItems.length) return;
@@ -138,11 +224,12 @@ export default function DiscountSection() {
       const seg = segmentWidthRef.current;
       if (!seg) return;
 
-      if (el.scrollLeft < seg * 0.35) seamlessJump(el.scrollLeft + seg);
-      else if (el.scrollLeft > seg * 2.65) seamlessJump(el.scrollLeft - seg);
+      const norm = getNormalizedScrollLeft(el, isRTL);
+
+      if (norm < seg * 0.35) seamlessJump(norm + seg);
+      else if (norm > seg * 2.65) seamlessJump(norm - seg);
     });
 
-    // اسنپ گروهی بعد از توقف اسکرول (ولی موقع pointerdown نزن)
     if (isPointerDownRef.current) return;
 
     if (snapTimerRef.current) clearTimeout(snapTimerRef.current);
@@ -156,11 +243,10 @@ export default function DiscountSection() {
     if (!el || !cardStep) return;
 
     const groupStep = getVisibleCount() * cardStep;
+    const norm = getNormalizedScrollLeft(el, isRTL);
+    const target = norm + direction * groupStep;
 
-    el.scrollBy({
-      left: direction * groupStep,
-      behavior: "smooth",
-    });
+    scrollToNormalized(el, target, isRTL, "smooth");
 
     if (snapTimerRef.current) clearTimeout(snapTimerRef.current);
     snapTimerRef.current = setTimeout(() => {
@@ -168,23 +254,21 @@ export default function DiscountSection() {
     }, 220);
   };
 
-  // ---------------- ✅ DRAG: ALWAYS GROUP SNAP ON RELEASE ----------------
   useEffect(() => {
     const el = sliderRef.current;
     if (!el) return;
 
-    const THRESHOLD = 8; // px (برای اینکه کلیک خراب نشه)
-    const VELOCITY_TRIGGER = 0.6; // px/ms
+    const THRESHOLD = 8;
+    const VELOCITY_TRIGGER = 0.6;
 
     const onDown = (e) => {
-      // روی لینک/دکمه داخل کارت درگ شروع نشه تا کلیک کار کنه
       if (e.target.closest("button,a,input,textarea,select,label")) return;
 
       isPointerDownRef.current = true;
       movedRef.current = false;
 
       startXRef.current = e.clientX;
-      startLeftRef.current = el.scrollLeft;
+      startNormLeftRef.current = getNormalizedScrollLeft(el, isRTL);
 
       lastXRef.current = e.clientX;
       lastTRef.current = performance.now();
@@ -193,21 +277,20 @@ export default function DiscountSection() {
     const onMove = (e) => {
       if (!isPointerDownRef.current) return;
 
-      const dx = e.clientX - startXRef.current;
+      const dxRaw = e.clientX - startXRef.current;
+      const dx = isRTL ? -dxRaw : dxRaw;
 
-      if (!movedRef.current && Math.abs(dx) >= THRESHOLD) {
+      if (!movedRef.current && Math.abs(dxRaw) >= THRESHOLD) {
         movedRef.current = true;
       }
       if (!movedRef.current) return;
 
-      // drag طبیعی
-      el.scrollLeft = startLeftRef.current - dx;
+      const nextNorm = startNormLeftRef.current - dx;
+      el.scrollLeft = toNativeScrollLeft(el, nextNorm, isRTL);
 
-      // برای محاسبه سرعت
       lastXRef.current = e.clientX;
       lastTRef.current = performance.now();
 
-      // وقتی درگ واقعی شد، جلوگیری از انتخاب متن
       e.preventDefault();
     };
 
@@ -215,33 +298,29 @@ export default function DiscountSection() {
       if (!isPointerDownRef.current) return;
       isPointerDownRef.current = false;
 
-      // اگر اصلاً درگ واقعی نبود => همونجا اسنپ کن (ولی کلیک لینک رو خراب نکن)
       if (!movedRef.current) {
-        // اسنپ نرم نزن که احساس “تکان” نده
         snapToGroup("auto");
         return;
       }
 
-      // جهت + سرعت
       const endX = e.clientX;
-      const totalDx = endX - startXRef.current;
+      const totalDxRaw = endX - startXRef.current;
+      const totalDx = isRTL ? -totalDxRaw : totalDxRaw;
 
       const now = performance.now();
       const dt = Math.max(1, now - lastTRef.current);
-      const vx = (endX - lastXRef.current) / dt; // px/ms
+      const vxRaw = (endX - lastXRef.current) / dt;
+      const vx = isRTL ? -vxRaw : vxRaw;
 
       const groupStep = getVisibleCount() * cardStep;
 
-      // تصمیم: اگر کشیدن زیاد بود یا سرعت زیاد بود => گروه بعد/قبل
       const shouldMove =
         Math.abs(totalDx) > groupStep * 0.15 || Math.abs(vx) > VELOCITY_TRIGGER;
 
       if (shouldMove) {
-        // اگر کاربر به چپ کشید (dx منفی) => باید به راست اسکرول کنیم (next)
         const dir = totalDx < 0 ? 1 : -1;
         scrollByGroup(dir);
       } else {
-        // کم کشیده => برگرد به نزدیک‌ترین گروه
         snapToGroup("smooth");
       }
 
@@ -261,31 +340,29 @@ export default function DiscountSection() {
       el.removeEventListener("pointercancel", onUp);
       el.removeEventListener("pointerleave", onUp);
     };
-  }, [cardStep]);
+  }, [cardStep, isRTL]);
 
   return (
     <section className="w-full relative py-10 md:py-14 overflow-x-hidden bg-[#2B4168] md:mb-20 mb-12 mt-4 rounded-[10px]">
       <div className="max-w-7xl mx-auto px-4">
-        {/* Header */}
         <div className="flex items-center justify-between mb-6 text-white">
           <div className="flex items-center gap-6">
             <h2 className="text-[16px] sm:text-[18px] md:text-[22px] font-medium">
-              Special discount
+              {t("home.specialDiscount")}
             </h2>
 
             <div className="flex items-center gap-2 text-sm">
-              <TimeBox value={hh} label="Hours" />
+              <TimeBox value={hh} label={t("timer.hours")} />
               <span>:</span>
-              <TimeBox value={mm} label="Min" />
+              <TimeBox value={mm} label={t("timer.min")} />
               <span>:</span>
-              <TimeBox value={ss} label="Sec" />
+              <TimeBox value={ss} label={t("timer.sec")} />
             </div>
           </div>
 
-          {/* Arrows (desktop too) */}
           <div className="md:flex gap-2 hidden">
             <button
-              onClick={() => scrollByGroup(-1)}
+              onClick={() => scrollByGroup(isRTL ? 1 : -1)}
               className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 grid place-items-center border border-[#ffffff81]"
               type="button"
               aria-label="prev"
@@ -294,7 +371,7 @@ export default function DiscountSection() {
             </button>
 
             <button
-              onClick={() => scrollByGroup(1)}
+              onClick={() => scrollByGroup(isRTL ? -1 : 1)}
               className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 grid place-items-center border border-[#ffffff81]"
               type="button"
               aria-label="next"
@@ -304,7 +381,6 @@ export default function DiscountSection() {
           </div>
         </div>
 
-        {/* Slider */}
         <div
           ref={sliderRef}
           onScroll={onScroll}

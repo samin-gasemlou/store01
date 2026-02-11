@@ -1,11 +1,25 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function ProductInfo({ product }) {
+  const { t } = useTranslation();
+
   const [size, setSize] = useState("90 ml");
   const [qty, setQty] = useState(1);
 
+  const productId = String(product?.id ?? "");
+
+  // ✅ ترجمه‌ی فیلدهای محصول (fallback به دیتای اصلی)
+  const tr = useMemo(() => {
+    return {
+      title: t(`products.${productId}.title`, product?.title),
+      description: t(`products.${productId}.description`, product?.description),
+      price: t(`products.${productId}.price`, product?.price),
+    };
+  }, [t, productId, product]);
+
   const numericPrice =
-    Number(String(product?.price ?? 0).replace(/[^0-9.-]+/g, "")) || 0;
+    Number(String(tr.price ?? 0).replace(/[^0-9.-]+/g, "")) || 0;
 
   const addToCart = () => {
     let cart = [];
@@ -21,7 +35,7 @@ export default function ProductInfo({ product }) {
     else {
       cart.push({
         id: product.id,
-        title: product.title,
+        title: tr.title, // ✅ ترجمه‌شده
         img: product.img,
         price: numericPrice,
         qty,
@@ -30,12 +44,11 @@ export default function ProductInfo({ product }) {
 
     localStorage.setItem("cart", JSON.stringify(cart));
     window.dispatchEvent(new Event("cartUpdated"));
-    alert("Product added to cart");
+    alert(t("single.addedToCart"));
   };
 
   return (
     <div className="w-full flex flex-col items-start gap-3 md:gap-4">
-      {/* ✅ TITLE */}
       <h1
         className="
           w-full
@@ -45,10 +58,9 @@ export default function ProductInfo({ product }) {
           leading-snug
         "
       >
-        {product.title}
+        {tr.title}
       </h1>
 
-      {/* ✅ RATING */}
       <div className="flex items-center gap-2">
         <div className="flex gap-1">
           <img src="/star.svg" className="w-4 sm:w-[18px]" alt="" />
@@ -59,16 +71,14 @@ export default function ProductInfo({ product }) {
         </div>
 
         <span className="text-gray-500 text-[12px] sm:text-[13px] md:text-sm">
-          Reviews ({product.reviewsCount || 13})
+          {t("single.reviews", { count: product.reviewsCount || 13 })}
         </span>
       </div>
 
-      {/* ✅ PRODUCT CODE */}
       <p className="text-gray-500 text-[12px] sm:text-[13px] md:text-sm">
-        Product Code: {product.code}
+        {t("single.productCode")}: {product.code}
       </p>
 
-      {/* ✅ DESCRIPTION (باکس‌دار و ریسپانسیو) */}
       <div
         className="
           w-full
@@ -80,16 +90,14 @@ export default function ProductInfo({ product }) {
         "
       >
         <p className="text-gray-600 text-[12px] sm:text-[14px] md:text-[15px] leading-6 text-justify">
-          {product.description}
+          {tr.description}
         </p>
       </div>
 
-      {/* ✅ QTY + SIZE (کاملاً کنار هم تو موبایل، ریسپانسیو) */}
       <div className="w-full flex items-center justify-center md:items-end gap-3 sm:gap-4 mt-1">
-        {/* QTY */}
         <div className="flex flex-col gap-2">
           <label className="font-medium text-[12px] sm:text-[13px] md:text-sm">
-            Qty:
+            {t("single.qty")}:
           </label>
 
           <div
@@ -107,7 +115,7 @@ export default function ProductInfo({ product }) {
               type="button"
               onClick={() => qty > 1 && setQty(qty - 1)}
               className="px-2 text-[18px] sm:text-[20px] leading-none"
-              aria-label="decrease"
+              aria-label={t("single.dec")}
             >
               −
             </button>
@@ -120,17 +128,16 @@ export default function ProductInfo({ product }) {
               type="button"
               onClick={() => setQty(qty + 1)}
               className="px-2 text-[18px] sm:text-[20px] leading-none"
-              aria-label="increase"
+              aria-label={t("single.inc")}
             >
               +
             </button>
           </div>
         </div>
 
-        {/* SIZE */}
         <div className="flex flex-col gap-2">
           <label className="font-medium text-[12px] sm:text-[13px] md:text-sm">
-            Size:
+            {t("single.size")}:
           </label>
 
           <select
@@ -147,20 +154,18 @@ export default function ProductInfo({ product }) {
               outline-none
             "
           >
-            <option>50 Mil</option>
-            <option>90 Mil</option>
-            <option>120 Mil</option>
+            <option value="50 Mil">{t("single.sizeOptions.50")}</option>
+            <option value="90 Mil">{t("single.sizeOptions.90")}</option>
+            <option value="120 Mil">{t("single.sizeOptions.120")}</option>
           </select>
         </div>
       </div>
 
-      {/* ✅ PRICE */}
       <p className="mt-2 text-[#2B4168] text-center w-full font-semibold text-[18px] sm:text-[20px] md:text-[24px]">
-        {product.price}
+        {tr.price}
       </p>
 
-      {/* ✅ BUTTONS (هم‌ردیف، ریسپانسیو، دو ردیفه نشه) */}
-      <div className="w-full  flex items-center gap-2 sm:gap-3">
+      <div className="w-full flex items-center gap-2 sm:gap-3">
         <button
           onClick={addToCart}
           type="button"
@@ -179,7 +184,7 @@ export default function ProductInfo({ product }) {
             min-w-0
           "
         >
-          ADD TO CART
+          {t("single.addToCart")}
         </button>
 
         <button
@@ -198,15 +203,14 @@ export default function ProductInfo({ product }) {
             min-w-0
           "
         >
-          BUY NOW
+          {t("single.buyNow")}
         </button>
       </div>
 
-      {/* ✅ FEATURES (ریسپانسیو و جمع‌وجور) */}
       <div className="w-full mt-6 sm:mt-8 grid grid-cols-3 gap-3 sm:gap-5">
-        <Feature icon="/truck-fast.svg" label="Fast shipping" />
-        <Feature icon="/medal-star.svg" label="Quality assurance" />
-        <Feature icon="/headphone.svg" label="Online support" />
+        <Feature icon="/truck-fast.svg" label={t("single.features.fastShipping")} />
+        <Feature icon="/medal-star.svg" label={t("single.features.quality")} />
+        <Feature icon="/headphone.svg" label={t("single.features.support")} />
       </div>
     </div>
   );

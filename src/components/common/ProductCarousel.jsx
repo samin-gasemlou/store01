@@ -1,16 +1,108 @@
-// src/components/common/ProductCarousel.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
 import ProductCard from "./ProductCard";
+import { useTranslation } from "react-i18next";
+
+// ✅ detect RTL scroll behavior (chrome/edge/firefox)
+function getRtlScrollType() {
+  if (typeof document === "undefined") return "default";
+  const div = document.createElement("div");
+  div.dir = "rtl";
+  div.style.width = "100px";
+  div.style.height = "100px";
+  div.style.overflow = "scroll";
+  div.style.position = "absolute";
+  div.style.top = "-9999px";
+
+  const inner = document.createElement("div");
+  inner.style.width = "200px";
+  inner.style.height = "100px";
+  div.appendChild(inner);
+  document.body.appendChild(div);
+
+  div.scrollLeft = 0;
+  const a = div.scrollLeft;
+  div.scrollLeft = 1;
+  const b = div.scrollLeft;
+
+  document.body.removeChild(div);
+
+  // reverse => initial is max (positive)
+  if (a > 0) return "reverse";
+  // negative => stays 0 when set to 1 (firefox)
+  if (b === 0) return "negative";
+  // default => becomes 1
+  return "default";
+}
 
 export default function MenCollection({
   items = [],
-  baseCount = 5,          // ✅ تعداد آیتم‌های پایه
-  mobileStep = 2,         // ✅ موبایل چندتا چندتا
-  desktopStep = 5,        // ✅ دسکتاپ چندتا چندتا
-  imageSrc = "/menn.png", // ✅ عکس سمت چپ
+  baseCount = 5,
+  mobileStep = 2,
+  desktopStep = 5,
+  imageSrc = "/menn.png",
 }) {
+  const { t, i18n } = useTranslation();
+
   const sliderRef = useRef(null);
   const firstItemRef = useRef(null);
+
+  const lang = (i18n.language || "en").split("-")[0];
+  const isRTL = lang === "ar" || lang === "ku";
+  const rtlTypeRef = useRef(getRtlScrollType());
+
+  // ✅ When drag happened, block the next click (so Links don't misfire)
+  const blockClickRef = useRef(false);
+
+  // ✅ normalized axis helpers
+  const getX = () => {
+    const el = sliderRef.current;
+    if (!el) return 0;
+    if (!isRTL) return el.scrollLeft;
+
+    const max = el.scrollWidth - el.clientWidth;
+    const type = rtlTypeRef.current;
+
+    if (type === "negative") return -el.scrollLeft; // firefox
+    if (type === "reverse") return max - el.scrollLeft; // chrome/edge
+    return el.scrollLeft; // safari default-ish
+  };
+
+  const setX = (x) => {
+    const el = sliderRef.current;
+    if (!el) return;
+    if (!isRTL) {
+      el.scrollLeft = x;
+      return;
+    }
+
+    const max = el.scrollWidth - el.clientWidth;
+    const type = rtlTypeRef.current;
+
+    if (type === "negative") el.scrollLeft = -x;
+    else if (type === "reverse") el.scrollLeft = max - x;
+    else el.scrollLeft = x;
+  };
+
+  const scrollByX = (dx, behavior = "smooth") => {
+    const el = sliderRef.current;
+    if (!el) return;
+
+    const next = getX() + dx;
+
+    if (!isRTL) {
+      el.scrollTo({ left: next, behavior });
+      return;
+    }
+
+    const max = el.scrollWidth - el.clientWidth;
+    const type = rtlTypeRef.current;
+    let raw = next;
+
+    if (type === "negative") raw = -next;
+    else if (type === "reverse") raw = max - next;
+
+    el.scrollTo({ left: raw, behavior });
+  };
 
   const baseItems = useMemo(() => {
     const arr = Array.isArray(items) ? items.filter(Boolean) : [];
@@ -19,7 +111,7 @@ export default function MenCollection({
   }, [items, baseCount]);
 
   const loopItems = useMemo(() => {
-    if (baseItems.length === 0) return [];
+    if (!baseItems.length) return [];
     return [...baseItems, ...baseItems, ...baseItems];
   }, [baseItems]);
 
@@ -27,11 +119,10 @@ export default function MenCollection({
   const segmentWidthRef = useRef(0);
   const rafRef = useRef(null);
 
-  // ✅ اندازه‌گیری عرض کارت + gap (gap-5 => 20px)
   useEffect(() => {
     const calc = () => {
       if (!firstItemRef.current) return;
-      const cardWidth = firstItemRef.current.offsetWidth + 20;
+      const cardWidth = firstItemRef.current.offsetWidth + 20; // gap-5 => 20px
       setCardStep(cardWidth);
       segmentWidthRef.current = cardWidth * baseItems.length;
     };
@@ -41,26 +132,25 @@ export default function MenCollection({
     return () => window.removeEventListener("resize", calc);
   }, [baseItems.length]);
 
-  // ✅ شروع از وسط
+  // ✅ start from middle
   useEffect(() => {
     const el = sliderRef.current;
-    if (!el) return;
-    if (baseItems.length === 0) return;
+    if (!el || !baseItems.length) return;
 
-    const t = setTimeout(() => {
+    const tmr = setTimeout(() => {
       const seg = segmentWidthRef.current;
       if (!seg) return;
-      el.scrollLeft = seg;
+      setX(seg);
     }, 0);
 
-    return () => clearTimeout(t);
-  }, [baseItems.length]);
+    return () => clearTimeout(tmr);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [baseItems.length, isRTL]);
 
-  // ✅ Loop هنگام اسکرول
+  // ✅ infinite loop
   const onScroll = () => {
     const el = sliderRef.current;
-    if (!el) return;
-    if (baseItems.length === 0) return;
+    if (!el || !baseItems.length) return;
 
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
 
@@ -68,82 +158,122 @@ export default function MenCollection({
       const seg = segmentWidthRef.current;
       if (!seg) return;
 
-      if (el.scrollLeft < seg * 0.5) el.scrollLeft += seg;
-      else if (el.scrollLeft > seg * 2.5) el.scrollLeft -= seg;
+      const x = getX();
+      if (x < seg * 0.5) setX(x + seg);
+      else if (x > seg * 2.5) setX(x - seg);
     });
   };
 
-  // ✅ دکمه‌ها (موبایل ۲تا۲تا، دسکتاپ ۴تا۴تا)
   const scrollByStep = (direction) => {
     const el = sliderRef.current;
     if (!el || !cardStep) return;
 
     const step = window.innerWidth < 768 ? mobileStep : desktopStep;
-
-    el.scrollBy({
-      left: direction * cardStep * step,
-      behavior: "smooth",
-    });
+    scrollByX(direction * cardStep * step, "smooth");
   };
 
-  // ✅ Drag با دست و موس (Pointer)
+  // ✅ Drag (RTL-safe) — FIXED so clicking cards still works
   useEffect(() => {
     const el = sliderRef.current;
     if (!el) return;
 
     let isDown = false;
-    let startX = 0;
-    let startLeft = 0;
+    let startClientX = 0;
+    let startAxis = 0;
+    let moved = false;
+    let pid = null;
+
+    const THRESHOLD = 6;
 
     const onDown = (e) => {
+      // ✅ اگر روی لینک/دکمه کلیک شد، درگ رو شروع نکن
+      if (e.target.closest("a,button,input,textarea,select,label")) return;
+
       isDown = true;
-      startX = e.clientX;
-      startLeft = el.scrollLeft;
-      el.setPointerCapture?.(e.pointerId);
+      moved = false;
+      pid = e.pointerId;
+
+      startClientX = e.clientX;
+      startAxis = getX();
     };
 
     const onMove = (e) => {
       if (!isDown) return;
-      const dx = e.clientX - startX;
-      el.scrollLeft = startLeft - dx;
+
+      const dx = e.clientX - startClientX;
+
+      // ✅ تا وقتی threshold رد نشده، چیزی تغییر نده (کلیک خراب نشه)
+      if (!moved && Math.abs(dx) < THRESHOLD) return;
+
+      // ✅ اینجا یعنی drag واقعی شروع شده
+      if (!moved) {
+        moved = true;
+        // ✅ فقط وقتی drag شروع شد capture کن (وگرنه کلیک Link می‌میره)
+        try {
+          el.setPointerCapture?.(pid);
+        } catch { /* empty */ }
+      }
+
+      setX(startAxis - dx);
+      e.preventDefault();
     };
 
-    const onUp = () => {
+    const end = () => {
+      if (!isDown) return;
       isDown = false;
+
+      // ✅ اگر drag انجام شد، کلیک بعدی رو بلاک کن تا کارت ناخواسته باز نشه/یا برعکس کلیک خراب نشه
+      if (moved) {
+        blockClickRef.current = true;
+        window.setTimeout(() => {
+          blockClickRef.current = false;
+        }, 0);
+      }
+
+      moved = false;
+      pid = null;
     };
 
     el.addEventListener("pointerdown", onDown, { passive: true });
-    el.addEventListener("pointermove", onMove, { passive: true });
-    el.addEventListener("pointerup", onUp, { passive: true });
-    el.addEventListener("pointercancel", onUp, { passive: true });
-    el.addEventListener("pointerleave", onUp, { passive: true });
+    el.addEventListener("pointermove", onMove, { passive: false });
+    el.addEventListener("pointerup", end, { passive: true });
+    el.addEventListener("pointercancel", end, { passive: true });
+    el.addEventListener("pointerleave", end, { passive: true });
 
     return () => {
       el.removeEventListener("pointerdown", onDown);
       el.removeEventListener("pointermove", onMove);
-      el.removeEventListener("pointerup", onUp);
-      el.removeEventListener("pointercancel", onUp);
-      el.removeEventListener("pointerleave", onUp);
+      el.removeEventListener("pointerup", end);
+      el.removeEventListener("pointercancel", end);
+      el.removeEventListener("pointerleave", end);
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isRTL]);
 
   return (
-    <section className="w-full  relative overflow-x-hidden md:mb-20">
-      {/* ✅ هم‌عرض بقیه سکشن‌ها (اینجا فقط max-w اضافه شد) */}
+    <section className="w-full relative overflow-x-hidden md:mb-20">
       <div className="w-full mx-auto px-2">
         <div className="flex flex-col md:flex-row items-center gap-4">
           <ImageBlock imageSrc={imageSrc} />
 
-          {/* ✅ جلوگیری از کش آمدن هدر با بزرگ شدن عرض کارت‌ها */}
           <div className="w-full md:flex-1 relative min-w-0">
             <Header
-              onLeft={() => scrollByStep(-1)}
-              onRight={() => scrollByStep(1)}
+              title={t("home.mostWanted")}
+              isRTL={isRTL}
+              onLeft={() => scrollByStep(isRTL ? 1 : -1)}
+              onRight={() => scrollByStep(isRTL ? -1 : 1)}
             />
 
             <div
               ref={sliderRef}
               onScroll={onScroll}
+              onClickCapture={(e) => {
+                // ✅ اگر همین الان drag انجام شده، کلیک رو بلاک کن
+                if (blockClickRef.current) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }
+              }}
               className="w-full flex gap-5 overflow-x-auto no-scrollbar py-2 cursor-grab active:cursor-grabbing"
             >
               {loopItems.map((item, idx) => (
@@ -169,20 +299,20 @@ export default function MenCollection({
   );
 }
 
-function Header({ onLeft, onRight }) {
-  return (
-    <div className="flex w-full justify-start md:gap-4 gap-10 mb-2 pt-4">
-      <h2 className="text-[18px] sm:text-[20px] md:text-[24px]">
-        Most Wanted Collection
-      </h2>
+function Header({ title, onLeft, onRight, isRTL }) {
+  const leftIcon = isRTL ? "/arrow-circle-left3.svg" : "/arrow-circle-left.svg";
+  const rightIcon = isRTL ? "/arrow-circle-left.svg" : "/arrow-circle-left3.svg";
 
-      {/* ✅ آیکون‌ها از دید خارج نشن */}
-      <div className="flex gap-2 shrink-0">
-        <button onClick={onLeft} type="button">
-          <img src="/arrow-circle-left.svg" className="w-6 md:w-full" alt="" />
+  return (
+    <div className="flex w-full items-center justify-between mb-2 pt-4">
+      <h2 className="text-[18px] sm:text-[20px] md:text-[24px]">{title}</h2>
+
+      <div className="flex md:gap-2 gap-0 shrink-0">
+        <button onClick={onLeft} type="button" className="w-8 h-8">
+          <img src={leftIcon} className="w-6 md:w-full" alt="" />
         </button>
-        <button onClick={onRight} type="button">
-          <img src="/arrow-circle-left3.svg" className="w-6 md:w-full" alt="" />
+        <button onClick={onRight} type="button" className="w-8 h-8">
+          <img src={rightIcon} className="w-6 md:w-full" alt="" />
         </button>
       </div>
     </div>

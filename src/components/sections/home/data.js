@@ -1,32 +1,38 @@
 export const categories = [
   {
     id: 1,
-    title: "Men’s Fragrances",
+    slug: "mens-fragrances",
+    titleKey: "categories.mensFragrances",
     img: "/men.png",
   },
   {
     id: 2,
-    title: "Women’s Fragrances",
+    slug: "womens-fragrances",
+    titleKey: "categories.womensFragrances",
     img: "/women.png",
   },
   {
     id: 3,
-    title: "Unisex Fragrances",
+    slug: "unisex-fragrances",
+    titleKey: "categories.unisexFragrances",
     img: "/unisex.png",
   },
   {
     id: 4,
-    title: "Gift Sets",
+    slug: "gift-sets",
+    titleKey: "categories.giftSets",
     img: "/gift.png",
   },
   {
     id: 5,
-    title: "New Arrivals",
+    slug: "new-arrivals",
+    titleKey: "categories.newArrivals",
     img: "/unisex.png",
   },
-    {
+  {
     id: 6,
-    title: "Men’s Fragrances",
+    slug: "mens-fragrances-2",
+    titleKey: "categories.mensFragrances",
     img: "/men.png",
   },
 ];

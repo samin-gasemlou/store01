@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ThumbsUp, ThumbsDown } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const initialReviews = [
   {
@@ -23,11 +24,26 @@ const initialReviews = [
 ];
 
 export default function ProductReviews() {
+  const { t, i18n } = useTranslation();
+
+  const lang = (i18n.language || "en").split("-")[0];
+  const isRTL = lang === "ar" || lang === "ku";
+
   const [reviews, setReviews] = useState(initialReviews);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+
+  // ✅ ترجمه‌ی نظرات نمونه (اگر در JSON گذاشتی)
+  const reviewsWithI18n = useMemo(() => {
+    return reviews.map((r) => {
+      const idKey = String(r.id);
+      const i18nName = t(`single.demoReviews.${idKey}.name`, { defaultValue: r.name });
+      const i18nText = t(`single.demoReviews.${idKey}.text`, { defaultValue: r.text });
+      return { ...r, name: i18nName, text: i18nText };
+    });
+  }, [reviews, t]);
 
   const handleSubmit = () => {
     if (!comment || !name) return;
@@ -52,22 +68,27 @@ export default function ProductReviews() {
   };
 
   return (
-    <section className="w-full mx-auto ">
-      <div className="bg-white rounded-3xl">
-
+    <section className="w-full mx-auto">
+      <div
+        dir={isRTL ? "rtl" : "ltr"}
+        className={`bg-white rounded-3xl ${isRTL ? "text-right" : "text-left"}`}
+      >
         {/* HEADER */}
         <div className="flex items-center justify-between mb-8">
-          <h3 className="text-xl text-[#1C1E1F] font-semibold">Reviews</h3>
-          <select className="border-[#1C1E1F] border text-[#1C1E1F] rounded-lg w-[81px] px-2 py-1 text-sm">
-            <option>Sort by</option>
-            <option>Newest</option>
-            <option>Highest rating</option>
+          <h3 className="text-xl text-[#1C1E1F] font-semibold">
+            {t("single.reviewsTitle")}
+          </h3>
+
+          <select className="border-[#1C1E1F] border text-[#1C1E1F] rounded-lg w-[110px] px-2 py-1 text-sm">
+            <option>{t("single.reviewSort.label")}</option>
+            <option>{t("single.reviewSort.newest")}</option>
+            <option>{t("single.reviewSort.highest")}</option>
           </select>
         </div>
 
         {/* REVIEWS LIST */}
         <div className="space-y-6 mb-12">
-          {reviews.map((review) => (
+          {reviewsWithI18n.map((review) => (
             <div
               key={review.id}
               className="bg-white shadow-[0px_0px_31.2px_rgba(0,0,0,0.05)] rounded-2xl p-5 flex flex-col gap-3"
@@ -77,12 +98,20 @@ export default function ProductReviews() {
                   <img
                     src={review.avatar}
                     className="w-10 h-10 rounded-full object-cover"
+                    alt=""
                   />
+
                   <div>
                     <p className="font-medium">{review.name}</p>
+
                     <div className="flex gap-1">
-                      {[1,2,3,4,5].map(i => (
-                        <span key={i} className={i <= review.rating ? "text-yellow-400" : "text-gray-300"}>★</span>
+                      {[1, 2, 3, 4, 5].map((i) => (
+                        <span
+                          key={i}
+                          className={i <= review.rating ? "text-yellow-400" : "text-gray-300"}
+                        >
+                          ★
+                        </span>
                       ))}
                     </div>
                   </div>
@@ -91,31 +120,37 @@ export default function ProductReviews() {
                 <div className="flex items-center justify-center md:flex-row flex-col md:p-0 px-2 gap-2 text-sm">
                   <button
                     onClick={() =>
-                      setReviews(reviews.map(r =>
-                        r.id === review.id ? { ...r, likes: r.likes + 1 } : r
-                      ))
+                      setReviews(
+                        reviews.map((r) =>
+                          r.id === review.id ? { ...r, likes: r.likes + 1 } : r
+                        )
+                      )
                     }
                     className="flex items-center gap-1 text-green-600"
+                    type="button"
+                    aria-label={t("single.reactions.like")}
                   >
                     <ThumbsUp size={16} /> {review.likes}
                   </button>
 
                   <button
                     onClick={() =>
-                      setReviews(reviews.map(r =>
-                        r.id === review.id ? { ...r, dislikes: r.dislikes + 1 } : r
-                      ))
+                      setReviews(
+                        reviews.map((r) =>
+                          r.id === review.id ? { ...r, dislikes: r.dislikes + 1 } : r
+                        )
+                      )
                     }
                     className="flex items-center gap-1 text-red-500"
+                    type="button"
+                    aria-label={t("single.reactions.dislike")}
                   >
                     <ThumbsDown size={16} /> {review.dislikes}
                   </button>
                 </div>
               </div>
 
-              <p className="text-gray-700 text-sm leading-relaxed">
-                {review.text}
-              </p>
+              <p className="text-gray-700 text-sm leading-relaxed">{review.text}</p>
             </div>
           ))}
         </div>
@@ -123,13 +158,15 @@ export default function ProductReviews() {
         {/* ADD REVIEW */}
         <div className="space-y-6">
           <div>
-            <p className="mb-2 text-sm font-medium">Rating:</p>
+            <p className="mb-2 text-sm font-medium">{t("single.addReview.rating")}:</p>
             <div className="flex gap-1">
-              {[1,2,3,4,5].map(i => (
+              {[1, 2, 3, 4, 5].map((i) => (
                 <button
                   key={i}
                   onClick={() => setRating(i)}
                   className={i <= rating ? "text-yellow-400 text-xl" : "text-gray-300 text-xl"}
+                  type="button"
+                  aria-label={t("single.addReview.setRating", { value: i })}
                 >
                   ★
                 </button>
@@ -138,37 +175,47 @@ export default function ProductReviews() {
           </div>
 
           <div>
-            <p className="mb-2 text-sm font-medium">Your Comments:</p>
+            <p className="mb-2 text-sm font-medium">{t("single.addReview.comments")}:</p>
             <textarea
               value={comment}
-              onChange={e => setComment(e.target.value)}
-              className="w-full bg-gray-100 rounded-xl p-4 min-h-[120px] resize-none"
+              onChange={(e) => setComment(e.target.value)}
+              className={`w-full bg-gray-100 rounded-xl p-4 min-h-[120px] resize-none ${
+                isRTL ? "text-right" : "text-left"
+              }`}
+              placeholder={t("single.addReview.commentsPlaceholder")}
             />
           </div>
 
           <div className="flex flex-col items-center justify-center gap-4">
-            <p className="mb-2 text-sm text-left w-full font-medium">Name</p>
+            <p className={`mb-2 text-sm w-full font-medium ${isRTL ? "text-right" : "text-left"}`}>
+              {t("single.addReview.name")}
+            </p>
             <input
               value={name}
-              onChange={e => setName(e.target.value)}
-              className="bg-gray-100 w-full rounded-xl p-3"
+              onChange={(e) => setName(e.target.value)}
+              className={`bg-gray-100 w-full rounded-xl p-3 ${isRTL ? "text-right" : "text-left"}`}
+              placeholder={t("single.addReview.namePlaceholder")}
             />
-            <p className="mb-2 text-sm text-left w-full font-medium">Email</p>
+
+            <p className={`mb-2 text-sm w-full font-medium ${isRTL ? "text-right" : "text-left"}`}>
+              {t("single.addReview.email")}
+            </p>
             <input
               value={email}
-              onChange={e => setEmail(e.target.value)}
-              className="bg-gray-100 w-full rounded-xl p-3"
+              onChange={(e) => setEmail(e.target.value)}
+              className={`bg-gray-100 w-full rounded-xl p-3 ${isRTL ? "text-right" : "text-left"}`}
+              placeholder={t("single.addReview.emailPlaceholder")}
             />
           </div>
 
           <button
             onClick={handleSubmit}
             className="bg-[#2B4168] text-white md:w-[197px] w-full px-10 py-3 rounded-lg mt-4 hover:opacity-90"
+            type="button"
           >
-            Submit
+            {t("single.addReview.submit")}
           </button>
         </div>
-
       </div>
     </section>
   );
