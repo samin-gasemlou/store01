@@ -69,8 +69,8 @@ export default function Checkout() {
     <div className="w-full flex flex-col items-center">
       <Navbar />
 
-      <section className="w-full px-4 md:px-10 pb-10">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10">
+      <section className="w-full px-2 mt-20 md:px-10 pb-20">
+        <div className="w-full mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10">
 
           {/* ORDER SUMMARY */}
           <div className="bg-white rounded-2xl p-6 h-fit">

@@ -182,10 +182,10 @@ function Header({ onLeft, onRight }) {
 
       <div className="flex gap-2 shrink-0">
         <button onClick={onLeft} type="button">
-          <img src="/arrow-circle-left.svg" alt="" />
+          <img src="/arrow-circle-left.svg" className="w-6 md:w-full" alt="" />
         </button>
         <button onClick={onRight} type="button">
-          <img src="/arrow-circle-left3.svg" alt="" />
+          <img src="/arrow-circle-left3.svg" className="w-6 md:w-full" alt="" />
         </button>
       </div>
     </div>
@@ -194,7 +194,7 @@ function Header({ onLeft, onRight }) {
 
 function ImageBlock({ imageSrc }) {
   return (
-    <div className="hidden md:flex shrink-0">
+    <div className="hidden lg:flex shrink-0">
       <img
         src={imageSrc}
         className="w-[300px] h-[413px] object-cover rounded-[10px]"

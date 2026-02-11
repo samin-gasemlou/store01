@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MainLayout from "./components/layout/MainLayout";
+import ScrollToTop from "./components/common/ScrollToTop";
 
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
@@ -16,12 +17,14 @@ import AccountPage from "./pages/AccountPage";
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop /> {/* ✅ این باید اینجا باشه */}
+
       <Routes>
-        {/* ✅ AUTH: بدون MainLayout => بدون Footer/MobileFooter/BottomNav */}
+        {/* AUTH بدون Layout */}
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
 
-        {/* ✅ MAIN: با MainLayout */}
+        {/* MAIN با Layout */}
         <Route
           path="/*"
           element={

@@ -178,12 +178,12 @@ function Header({ onLeft, onRight }) {
     <div className="flex w-full items-center justify-between mb-2 pt-4">
       <h2 className="text-[18px] sm:text-[20px] md:text-[24px]">Just Landed</h2>
 
-      <div className="flex gap-2 shrink-0">
-        <button onClick={onLeft} type="button" className="w-9 h-9">
-          <img src="/arrow-circle-left.svg" alt="" />
+      <div className="flex gap-0 shrink-0">
+        <button onClick={onLeft} type="button" className="w-8 h-8">
+          <img src="/arrow-circle-left.svg" className="w-6 md:w-full" alt="" />
         </button>
-        <button onClick={onRight} type="button" className="w-9 h-9">
-          <img src="/arrow-circle-left3.svg" alt="" />
+        <button onClick={onRight} type="button" className="w-8 h-8">
+          <img src="/arrow-circle-left3.svg " className="w-6 md:w-full" alt="" />
         </button>
       </div>
     </div>
@@ -192,7 +192,7 @@ function Header({ onLeft, onRight }) {
 
 function ImageBlock({ imageSrc }) {
   return (
-    <div className="hidden md:flex shrink-0">
+    <div className="hidden lg:flex shrink-0">
       <img
         src={imageSrc}
         className="w-[300px] h-[413px] object-cover rounded-[10px]"

@@ -32,7 +32,7 @@ export default function AccountPage() {
     <section className="w-full flex flex-col items-center">
       <Navbar />
 
-      <div className="w-full max-w-7xl px-4 py-10 mb-20 z-50">
+      <div className="w-full px-2 md:mt-0 mt-15 py-10 mb-20 z-50">
         <h1 className="text-xl font-semibold text-center mb-8">
           My Account
         </h1>

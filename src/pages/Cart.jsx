@@ -54,8 +54,8 @@ export default function Cart() {
   return (
     <div className="w-full flex flex-col items-center justify-center">
       <Navbar />
-      <section className="w-full px-4 md:px-10 pb-10 mb-24 md:mt-2">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <section className="w-full px-2 md:px-10 pb-10 mb-24 md:mt-10 mt-20">
+        <div className="w-full mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
 
           {/* CART ITEMS */}
           <div className="lg:col-span-2 bg-white rounded-2xl p-6">

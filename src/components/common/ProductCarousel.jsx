@@ -1,23 +1,25 @@
+// src/components/common/ProductCarousel.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
 import ProductCard from "./ProductCard";
 
 export default function MenCollection({
   items = [],
-  baseCount = 5,
-  mobileStep = 2,
-  desktopStep = 5,
-  imageSrc = "/menn.png",
+  baseCount = 5,          // ✅ تعداد آیتم‌های پایه
+  mobileStep = 2,         // ✅ موبایل چندتا چندتا
+  desktopStep = 5,        // ✅ دسکتاپ چندتا چندتا
+  imageSrc = "/menn.png", // ✅ عکس سمت چپ
 }) {
   const sliderRef = useRef(null);
   const firstItemRef = useRef(null);
 
   const baseItems = useMemo(() => {
     const arr = Array.isArray(items) ? items.filter(Boolean) : [];
-    return arr.slice(0, baseCount);
+    const sliced = arr.slice(0, baseCount);
+    return sliced.length ? sliced : [];
   }, [items, baseCount]);
 
   const loopItems = useMemo(() => {
-    if (!baseItems.length) return [];
+    if (baseItems.length === 0) return [];
     return [...baseItems, ...baseItems, ...baseItems];
   }, [baseItems]);
 
@@ -25,7 +27,7 @@ export default function MenCollection({
   const segmentWidthRef = useRef(0);
   const rafRef = useRef(null);
 
-  // اندازه‌گیری عرض کارت
+  // ✅ اندازه‌گیری عرض کارت + gap (gap-5 => 20px)
   useEffect(() => {
     const calc = () => {
       if (!firstItemRef.current) return;
@@ -39,10 +41,11 @@ export default function MenCollection({
     return () => window.removeEventListener("resize", calc);
   }, [baseItems.length]);
 
-  // شروع از وسط
+  // ✅ شروع از وسط
   useEffect(() => {
     const el = sliderRef.current;
-    if (!el || !baseItems.length) return;
+    if (!el) return;
+    if (baseItems.length === 0) return;
 
     const t = setTimeout(() => {
       const seg = segmentWidthRef.current;
@@ -53,10 +56,11 @@ export default function MenCollection({
     return () => clearTimeout(t);
   }, [baseItems.length]);
 
-  // Loop هنگام اسکرول
+  // ✅ Loop هنگام اسکرول
   const onScroll = () => {
     const el = sliderRef.current;
-    if (!el || !baseItems.length) return;
+    if (!el) return;
+    if (baseItems.length === 0) return;
 
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
 
@@ -69,6 +73,7 @@ export default function MenCollection({
     });
   };
 
+  // ✅ دکمه‌ها (موبایل ۲تا۲تا، دسکتاپ ۴تا۴تا)
   const scrollByStep = (direction) => {
     const el = sliderRef.current;
     if (!el || !cardStep) return;
@@ -81,7 +86,7 @@ export default function MenCollection({
     });
   };
 
-  // ✅ Drag حرفه‌ای با threshold (کلیک خراب نشه)
+  // ✅ Drag با دست و موس (Pointer)
   useEffect(() => {
     const el = sliderRef.current;
     if (!el) return;
@@ -89,60 +94,47 @@ export default function MenCollection({
     let isDown = false;
     let startX = 0;
     let startLeft = 0;
-    let moved = false;
-    const THRESHOLD = 6;
 
     const onDown = (e) => {
-      // اگر روی لینک یا دکمه کلیک شد، drag شروع نشه
-      if (e.target.closest("button,a")) return;
-
       isDown = true;
-      moved = false;
       startX = e.clientX;
       startLeft = el.scrollLeft;
+      el.setPointerCapture?.(e.pointerId);
     };
 
     const onMove = (e) => {
       if (!isDown) return;
-
       const dx = e.clientX - startX;
-
-      if (!moved && Math.abs(dx) > THRESHOLD) {
-        moved = true;
-      }
-
-      if (!moved) return;
-
       el.scrollLeft = startLeft - dx;
-      e.preventDefault();
     };
 
     const onUp = () => {
       isDown = false;
-      moved = false;
     };
 
-    el.addEventListener("pointerdown", onDown);
-    el.addEventListener("pointermove", onMove);
-    el.addEventListener("pointerup", onUp);
-    el.addEventListener("pointerleave", onUp);
-    el.addEventListener("pointercancel", onUp);
+    el.addEventListener("pointerdown", onDown, { passive: true });
+    el.addEventListener("pointermove", onMove, { passive: true });
+    el.addEventListener("pointerup", onUp, { passive: true });
+    el.addEventListener("pointercancel", onUp, { passive: true });
+    el.addEventListener("pointerleave", onUp, { passive: true });
 
     return () => {
       el.removeEventListener("pointerdown", onDown);
       el.removeEventListener("pointermove", onMove);
       el.removeEventListener("pointerup", onUp);
-      el.removeEventListener("pointerleave", onUp);
       el.removeEventListener("pointercancel", onUp);
+      el.removeEventListener("pointerleave", onUp);
     };
   }, []);
 
   return (
-    <section className="w-full relative overflow-x-hidden md:mb-20">
+    <section className="w-full  relative overflow-x-hidden md:mb-20">
+      {/* ✅ هم‌عرض بقیه سکشن‌ها (اینجا فقط max-w اضافه شد) */}
       <div className="w-full mx-auto px-2">
         <div className="flex flex-col md:flex-row items-center gap-4">
           <ImageBlock imageSrc={imageSrc} />
 
+          {/* ✅ جلوگیری از کش آمدن هدر با بزرگ شدن عرض کارت‌ها */}
           <div className="w-full md:flex-1 relative min-w-0">
             <Header
               onLeft={() => scrollByStep(-1)}
@@ -152,7 +144,7 @@ export default function MenCollection({
             <div
               ref={sliderRef}
               onScroll={onScroll}
-              className="w-full flex gap-5 overflow-x-auto no-scrollbar py-2 cursor-grab active:cursor-grabbing select-none"
+              className="w-full flex gap-5 overflow-x-auto no-scrollbar py-2 cursor-grab active:cursor-grabbing"
             >
               {loopItems.map((item, idx) => (
                 <div
@@ -169,6 +161,7 @@ export default function MenCollection({
                 </div>
               ))}
             </div>
+
           </div>
         </div>
       </div>
@@ -183,6 +176,7 @@ function Header({ onLeft, onRight }) {
         Most Wanted Collection
       </h2>
 
+      {/* ✅ آیکون‌ها از دید خارج نشن */}
       <div className="flex gap-2 shrink-0">
         <button onClick={onLeft} type="button">
           <img src="/arrow-circle-left.svg" className="w-6 md:w-full" alt="" />

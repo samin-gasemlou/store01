@@ -26,13 +26,13 @@ export default function SearchPage() {
       <Navbar />
 
       {/* SEARCH HEADER */}
-      <div className="w-full max-w-7xl px-4 mt-10 lg:block hidden">
+      <div className="w-full px-2 mt-10 lg:block hidden">
         <h1 className="text-xl font-semibold text-center mb-6">
           Search Products
         </h1>
 
         {/* SEARCH INPUT */}
-        <div className="max-w-xl mx-auto">
+        <div className="w-full mx-auto">
           <input
             type="text"
             value={query}
@@ -44,7 +44,7 @@ export default function SearchPage() {
       </div>
 
       {/* RESULTS */}
-      <div className="w-full max-w-7xl px-4 mt-10 mb-20">
+      <div className="w-full  px-4 md:mt-10 mt-20 mb-20">
         {filteredProducts.length === 0 ? (
           <p className="text-center text-gray-500">
             No products found.

@@ -24,8 +24,8 @@ export default function Contact() {
     <div className="w-full flex flex-col items-center">
       <Navbar />
 
-      <section className="w-full px-4 md:px-10 mb-26 ">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12">
+      <section className="w-full px-4 md:px-10 mb-26 mt-20">
+        <div className="w-full mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12">
 
           {/* FORM */}
           <form

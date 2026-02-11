@@ -27,9 +27,7 @@ export default function Store() {
 
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
 
-  // ✅ keep page valid (NO useEffect)
-  const safePage =
-    currentPage > totalPages ? 1 : currentPage;
+  const safePage = currentPage > totalPages ? 1 : currentPage;
 
   const startIndex = (safePage - 1) * ITEMS_PER_PAGE;
   const currentProducts = filteredProducts.slice(
@@ -47,32 +45,24 @@ export default function Store() {
     <section className="flex flex-col items-center w-full">
       <Navbar />
 
-      <div className="w-full max-w-7xl mx-auto px-4 mt-20 z-50">
+      <div className="w-[90%] md:w-full  mx-auto px-2 md:mt-0 mt-20">
         <BreadCrumb category={category} subCategory={subCategory} />
 
         <h1 className="text-center text-xl font-semibold mb-8 w-full">
           {title}
         </h1>
 
-        {/* PRODUCTS GRID */}
+        {/* ✅ PRODUCTS GRID — فاصله یکسان در همه سایزها */}
         <div
           className="
-    grid
-    grid-cols-1
-    sm:grid-cols-2
-    md:grid-cols-3
-    lg:grid-cols-4
-    xl:grid-cols-5
-
-    gap-x-6
-    sm:gap-x-6
-    lg:gap-x-8
-
-    gap-y-10
-    lg:gap-y-4
-    xl:gap-y-4
-
-    mb-12
+            grid
+            grid-cols-1
+            sm:grid-cols-2
+            md:grid-cols-3
+            lg:grid-cols-4
+            xl:grid-cols-5
+            gap-6
+            mb-12
           "
         >
           {currentProducts.map((item) => (
@@ -80,53 +70,46 @@ export default function Store() {
           ))}
         </div>
 
-       {/* PAGINATION */}
-      {totalPages > 1 && (
-       <div className="flex flex-wrap justify-center items-center gap-2 mb-20 w-full">
+        {/* PAGINATION */}
+        {totalPages > 1 && (
+          <div className="flex flex-wrap justify-center items-center gap-2 mb-20 w-full">
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={safePage === 1}
+              className="px-3 py-2 border-none disabled:opacity-40"
+            >
+              <img src="/arrow-circle-left.svg" alt="" />
+            </button>
 
-    {/* PREV */}
-    <button
-      onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-      disabled={safePage === 1}
-      className="px-3 py-2 border-none disabled:opacity-40"
-    >
-      <img src="/arrow-circle-left.svg" alt="" />
-    </button>
+            <div className="hidden sm:flex gap-2">
+              {Array.from({ length: totalPages }).map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className="w-9 h-9 border border-[#1C1E1F] rounded-full"
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
 
-    {/* DESKTOP: show all pages */}
-    <div className="hidden sm:flex gap-2">
-      {Array.from({ length: totalPages }).map((_, i) => (
-        <button
-          key={i}
-          onClick={() => setCurrentPage(i + 1)}
-          className="w-9 h-9 border border-[#1C1E1F] rounded-full"
-        >
-          {i + 1}
-        </button>
-      ))}
-    </div>
+            <div className="flex sm:hidden">
+              <button className="w-9 h-9 border border-[#1C1E1F] rounded-full">
+                {safePage}
+              </button>
+            </div>
 
-    {/* MOBILE: show only current page */}
-    <div className="flex sm:hidden">
-      <button className="w-9 h-9 border border-[#1C1E1F] rounded-full">
-        {safePage}
-      </button>
-    </div>
-
-    {/* NEXT */}
-    <button
-      onClick={() =>
-        setCurrentPage((p) => Math.min(p + 1, totalPages))
-      }
-      disabled={safePage === totalPages}
-      className="px-3 py-2 border-none disabled:opacity-40"
-    >
-      <img src="/arrow-circle-left2.svg" alt="" />
-    </button>
-
-       </div>
-       )}
-
+            <button
+              onClick={() =>
+                setCurrentPage((p) => Math.min(p + 1, totalPages))
+              }
+              disabled={safePage === totalPages}
+              className="px-3 py-2 border-none disabled:opacity-40"
+            >
+              <img src="/arrow-circle-left2.svg" alt="" />
+            </button>
+          </div>
+        )}
       </div>
 
       <Footer />

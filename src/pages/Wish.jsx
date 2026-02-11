@@ -22,7 +22,7 @@ export default function Wish() {
     <section className="w-full flex flex-col items-center">
       <Navbar />
 
-      <div className="w-full max-w-7xl px-4 mb-20 ">
+      <div className="w-full md:mt-10 mt-20 px-4 mb-20 ">
         <h1 className="text-xl font-semibold text-center mb-8">
           Wishlist
         </h1>
