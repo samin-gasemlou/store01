@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-
+import { Link } from "react-router-dom";
 export default function MobileTopBar() {
   const [open, setOpen] = useState(false);
   const [lang, setLang] = useState("EN");
@@ -24,7 +24,7 @@ export default function MobileTopBar() {
 
           <div
             className={`
-              absolute left-0 top-3.5  bg-white shadow-lg rounded-md py-1  w-44
+              absolute left-0 top-4.5  bg-white shadow-lg rounded-md py-1  w-44
               transition-all duration-200 ease-out flex flex-row items-center justify-center
               ${open
                 ? "opacity-100 visible translate-y-0 "
@@ -53,7 +53,7 @@ export default function MobileTopBar() {
         </div>
 
         {/* Logo */}
-        <h1 className="font-bold text-[#2B4168]">01 STORE</h1>
+       <Link to="/"><h1 className="font-bold text-[#2B4168]">01 STORE</h1></Link> 
       </div>
     </div>
   );

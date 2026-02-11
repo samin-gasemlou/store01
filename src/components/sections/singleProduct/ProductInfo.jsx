@@ -4,139 +4,231 @@ export default function ProductInfo({ product }) {
   const [size, setSize] = useState("90 ml");
   const [qty, setQty] = useState(1);
 
-   // تابع اضافه کردن محصول به سبد خرید
+  const numericPrice =
+    Number(String(product?.price ?? 0).replace(/[^0-9.-]+/g, "")) || 0;
+
   const addToCart = () => {
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-    const existing = cart.find(item => item.id === product.id);
-    if (existing) {
-      existing.qty += 1;
-    } else {
+    let cart = [];
+    try {
+      cart = JSON.parse(localStorage.getItem("cart")) || [];
+    } catch {
+      cart = [];
+    }
+
+    const existing = cart.find((item) => String(item.id) === String(product.id));
+
+    if (existing) existing.qty += qty;
+    else {
       cart.push({
         id: product.id,
         title: product.title,
         img: product.img,
-        price: Number(String(product.price).replace(/[^0-9.-]+/g, "")) || 0,
-        qty: 1
+        price: numericPrice,
+        qty,
       });
     }
+
     localStorage.setItem("cart", JSON.stringify(cart));
     window.dispatchEvent(new Event("cartUpdated"));
     alert("Product added to cart");
   };
 
-
   return (
-    <div className="w-full flex flex-col items-center md:items-start justify-center gap-2">
-
-      {/* TITLE */}
-      <h1 className="md:text-3xl text-[20px] sm:text-4xl font-semibold text-center px-4 md:px-0">
+    <div className="w-full flex flex-col items-start gap-3 md:gap-4">
+      {/* ✅ TITLE */}
+      <h1
+        className="
+          w-full
+          text-left
+          font-semibold
+          text-[18px] sm:text-[22px] md:text-[26px] lg:text-[30px]
+          leading-snug
+        "
+      >
         {product.title}
       </h1>
 
-      {/* RATING */}
-      <div className="flex items-center gap-2 text-sm">
+      {/* ✅ RATING */}
+      <div className="flex items-center gap-2">
         <div className="flex gap-1">
-          <img src="/star.svg" alt="" />
-          <img src="/star.svg" alt="" />
-          <img src="/star.svg" alt="" />
-          <img src="/star.svg" alt="" />
-          <img src="/star.svg" alt="" />
+          <img src="/star.svg" className="w-4 sm:w-[18px]" alt="" />
+          <img src="/star.svg" className="w-4 sm:w-[18px]" alt="" />
+          <img src="/star.svg" className="w-4 sm:w-[18px]" alt="" />
+          <img src="/star.svg" className="w-4 sm:w-[18px]" alt="" />
+          <img src="/star.svg" className="w-4 sm:w-[18px]" alt="" />
         </div>
-        <span className="text-gray-500">
+
+        <span className="text-gray-500 text-[12px] sm:text-[13px] md:text-sm">
           Reviews ({product.reviewsCount || 13})
         </span>
       </div>
 
-      {/* PRODUCT CODE */}
-      <p className="text-sm text-gray-500 ">
+      {/* ✅ PRODUCT CODE */}
+      <p className="text-gray-500 text-[12px] sm:text-[13px] md:text-sm">
         Product Code: {product.code}
       </p>
 
-      {/* DESCRIPTION */}
-      <p className="text-gray-600 leading-relaxed text-sm sm:text-base max-w-xl text-justify md:p-2 p-6">
-        {product.description}
-      </p>
+      {/* ✅ DESCRIPTION (باکس‌دار و ریسپانسیو) */}
+      <div
+        className="
+          w-full
+          bg-white
+          rounded-2xl
+          shadow-sm
+          border border-gray-100
+          p-3 sm:p-4 md:p-5
+        "
+      >
+        <p className="text-gray-600 text-[12px] sm:text-[14px] md:text-[15px] leading-6 text-justify">
+          {product.description}
+        </p>
+      </div>
 
-    {/* QTY */}
-      <div className="flex md:flex-col gap-2">
-        <label className="font-medium">Qty:</label>
+      {/* ✅ QTY + SIZE (کاملاً کنار هم تو موبایل، ریسپانسیو) */}
+      <div className="w-full flex items-center justify-center md:items-end gap-3 sm:gap-4 mt-1">
+        {/* QTY */}
+        <div className="flex flex-col gap-2">
+          <label className="font-medium text-[12px] sm:text-[13px] md:text-sm">
+            Qty:
+          </label>
 
-        <div className="flex items-center h-[29px] border border-[#1C1E1F] rounded-lg w-[81px] justify-between px-2 py-1">
-          <button
-            onClick={() => qty > 1 && setQty(qty - 1)}
-            className="text-lg px-2"
+          <div
+            className="
+              flex items-center justify-between
+              h-9 sm:h-10 md:h-11
+              w-[110px] sm:w-[130px]
+              border border-[#1C1E1F]
+              rounded-xl
+              px-2 
+              select-none
+            "
           >
-            −
-          </button>
+            <button
+              type="button"
+              onClick={() => qty > 1 && setQty(qty - 1)}
+              className="px-2 text-[18px] sm:text-[20px] leading-none"
+              aria-label="decrease"
+            >
+              −
+            </button>
 
-          <span className="text-sm">{qty}</span>
+            <span className="text-[12px] sm:text-[13px] md:text-sm font-semibold">
+              {qty}
+            </span>
 
-          <button
-            onClick={() => setQty(qty + 1)}
-            className="text-lg px-2"
+            <button
+              type="button"
+              onClick={() => setQty(qty + 1)}
+              className="px-2 text-[18px] sm:text-[20px] leading-none"
+              aria-label="increase"
+            >
+              +
+            </button>
+          </div>
+        </div>
+
+        {/* SIZE */}
+        <div className="flex flex-col gap-2">
+          <label className="font-medium text-[12px] sm:text-[13px] md:text-sm">
+            Size:
+          </label>
+
+          <select
+            value={size}
+            onChange={(e) => setSize(e.target.value)}
+            className="
+              h-9 sm:h-10 md:h-11
+              w-[110px] sm:w-[130px]
+              border border-[#1C1E1F]
+              rounded-xl
+              text-[12px] sm:text-[13px] md:text-sm
+              px-2
+              bg-white
+              outline-none
+            "
           >
-            +
-          </button>
+            <option>50 Mil</option>
+            <option>90 Mil</option>
+            <option>120 Mil</option>
+          </select>
         </div>
       </div>
-    {/* SIZE */}
-      <div className="flex md:flex-col gap-2">
-        <label className="font-medium">Size:</label>
-        <select
-          value={size}
-          onChange={(e) => setSize(e.target.value)}
-          className="w-[81px] h-[29px] border border-[#1C1E1F] rounded-lg text-sm"
-        >
-          <option>50 Mil</option>
-          <option>90 Mil</option>
-          <option>120 Mil</option>
-        </select>
-      </div>
 
-
-
-
-
-      {/* PRICE */}
-      <p className="text-2xl font-semibold text-[#2B4168]">
+      {/* ✅ PRICE */}
+      <p className="mt-2 text-[#2B4168] text-center w-full font-semibold text-[18px] sm:text-[20px] md:text-[24px]">
         {product.price}
       </p>
 
-      {/* BUTTONS */}
-      <div className="flex flex-row gap-4 mt-2">
-        <button onClick={addToCart} className="bg-[#2B4168] text-white md:py-4 py-2 px-8 rounded-lg text-sm sm:text-base hover:bg-[#2B4168] transition w-[90%] md:w-[303px]">
+      {/* ✅ BUTTONS (هم‌ردیف، ریسپانسیو، دو ردیفه نشه) */}
+      <div className="w-full  flex items-center gap-2 sm:gap-3">
+        <button
+          onClick={addToCart}
+          type="button"
+          className="
+            flex-1
+            h-10 sm:h-11 md:h-12
+            rounded-xl
+            bg-[#2B4168]
+            text-white
+            text-[12px] sm:text-[14px] md:text-[15px]
+            font-semibold
+            whitespace-nowrap
+            md:px-3 px-2
+            hover:brightness-95
+            transition
+            min-w-0
+          "
+        >
           ADD TO CART
         </button>
 
-        <button className="border border-gray-800 md:py-4 py-2 px-8 rounded-lg text-sm sm:text-base hover:bg-gray-100 transition w-[90%] md:w-[303px]">
+        <button
+          type="button"
+          className="
+            flex-1
+            h-10 sm:h-11 md:h-12
+            rounded-xl
+            border border-gray-800
+            text-[12px] sm:text-[14px] md:text-[15px]
+            font-semibold
+            whitespace-nowrap
+            md:px-3 px-2
+            hover:bg-gray-100
+            transition
+            min-w-0
+          "
+        >
           BUY NOW
         </button>
       </div>
 
-      {/* FEATURES */}
-      <div className="flex items-center justify-center gap-6 mt-10 text-center text-sm">
-        <div className="flex items-center justify-center md:flex-row flex-col gap-2">
-          <div className="w-12 h-12 rounded-full border border-[#2B4168] flex items-center justify-center text-[#2B4168]">
-            <img src="/truck-fast.svg" alt="" />
-          </div>
-          <p>Fast shipping</p>
-        </div>
+      {/* ✅ FEATURES (ریسپانسیو و جمع‌وجور) */}
+      <div className="w-full mt-6 sm:mt-8 grid grid-cols-3 gap-3 sm:gap-5">
+        <Feature icon="/truck-fast.svg" label="Fast shipping" />
+        <Feature icon="/medal-star.svg" label="Quality assurance" />
+        <Feature icon="/headphone.svg" label="Online support" />
+      </div>
+    </div>
+  );
+}
 
-        <div className="flex items-center justify-center md:flex-row flex-col gap-2">
-          <div className="w-12 h-12 rounded-full border border-[#2B4168] flex items-center justify-center text-[#2B4168]">
-            <img src="/medal-star.svg" alt="" />
-          </div>
-          <p>Quality assurance</p>
-        </div>
-
-        <div className="flex items-center justify-center md:flex-row flex-col gap-2">
-          <div className="w-12 h-12 rounded-full border border-[#2B4168] flex items-center justify-center text-[#2B4168]">
-            <img src="/headphone.svg" alt="" />
-          </div>
-          <p>Online support</p>
-        </div>
+function Feature({ icon, label }) {
+  return (
+    <div className="flex flex-col items-center gap-2 text-center">
+      <div
+        className="
+          w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14
+          rounded-full
+          border border-[#2B4168]
+          grid place-items-center
+        "
+      >
+        <img src={icon} className="w-5 sm:w-6 md:w-7" alt="" draggable={false} />
       </div>
 
+      <p className="text-[11px] sm:text-[12px] md:text-[13px] text-gray-700">
+        {label}
+      </p>
     </div>
   );
 }

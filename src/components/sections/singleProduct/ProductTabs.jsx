@@ -1,20 +1,19 @@
 import { useState } from "react";
 import ProductReviews from "../singleProduct/ProductReviews";
+
 export default function ProductTabs({ product }) {
-  const [activeTab, setActiveTab] = useState("specs");
+  // ✅ دیسکریپشن پیش‌فرض باز
+  const [activeTab, setActiveTab] = useState("desc");
+
+  if (!product) return null;
 
   return (
     <section className="w-full mx-auto md:px-4 mt-16 mb-4">
 
       {/* TABS HEADER */}
       <div className="flex md:flex-wrap gap-3 w-full">
-        <TabButton
-          active={activeTab === "specs"}
-          onClick={() => setActiveTab("specs")}
-        >
-          Specifications
-        </TabButton>
 
+        {/* ✅ DESCRIPTION اول */}
         <TabButton
           active={activeTab === "desc"}
           onClick={() => setActiveTab("desc")}
@@ -23,15 +22,30 @@ export default function ProductTabs({ product }) {
         </TabButton>
 
         <TabButton
+          active={activeTab === "specs"}
+          onClick={() => setActiveTab("specs")}
+        >
+          Specifications
+        </TabButton>
+
+        <TabButton
           active={activeTab === "reviews"}
           onClick={() => setActiveTab("reviews")}
         >
-          Reviews 
+          Reviews
         </TabButton>
+
       </div>
 
       {/* CONTENT */}
       <div className="bg-white rounded-tr-3xl rounded-bl-3xl rounded-br-3xl p-6 sm:p-10 w-full">
+
+        {/* ✅ DESCRIPTION (پیش‌فرض) */}
+        {activeTab === "desc" && (
+          <p className="text-gray-600 leading-relaxed text-sm sm:text-base w-full">
+            {product?.description}
+          </p>
+        )}
 
         {/* SPECIFICATIONS */}
         {activeTab === "specs" && (
@@ -41,21 +55,12 @@ export default function ProductTabs({ product }) {
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 text-sm sm:text-base">
-
               <SpecRow label="Fragrance Notes" value="Top Notes" />
               <SpecRow label="Longevity" value="Moderate" />
               <SpecRow label="Projection" value="Strong" />
               <SpecRow label="Best Season" value="Summer / Winter" />
-
             </div>
           </>
-        )}
-
-        {/* DESCRIPTION */}
-        {activeTab === "desc" && (
-          <p className="text-gray-600 leading-relaxed text-sm sm:text-base w-full">
-            {product.description}
-          </p>
         )}
 
         {/* REVIEWS */}
@@ -75,7 +80,8 @@ function TabButton({ active, children, onClick }) {
     <button
       onClick={onClick}
       className={`
-        md:px-6 px-2 py-2 md:py-3 md:w-[190px] rounded-t-xl md:text-sm text-[14px] sm:text-base border
+        md:px-6 px-2 py-2 md:py-3 md:w-[190px]
+        rounded-t-xl md:text-sm text-[14px] sm:text-base border
         transition
         ${
           active

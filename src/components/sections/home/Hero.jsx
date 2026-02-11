@@ -56,7 +56,7 @@ export default function HeroSlider() {
   };
 
   return (
-    <div className="w-full md:mt-16 mt-12 px-3 sm:px-4 z-50 md:z-40">
+    <div className="w-full md:mt-16 mt-20 px-1 sm:px-4 z-50 md:z-40">
       <div
         className="
           relative isolate
@@ -125,7 +125,7 @@ export default function HeroSlider() {
         <div className="absolute bottom-0 left-0 right-0 flex justify-center pointer-events-none z-50">
           <div
             className="
-              bg-white
+              bg-[#f2f3f5]
               w-[120px] sm:w-[140px]
               h-6 sm:h-7
               rounded-t-full

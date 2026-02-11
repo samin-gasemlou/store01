@@ -2,16 +2,16 @@
 
 /* 🔒 ROOT OVERFLOW FIX */
 html,
-body,
+body {
+  width: 100%;
+  overflow-x: hidden;
+}
+
 #root {
   width: 100%;
-  max-width: 100%;
   overflow-x: clip;
 }
 
-body {
-  background-color: #f2f3f5;
-}
 
 /* UTILITIES */
 .clip-trapezoid {

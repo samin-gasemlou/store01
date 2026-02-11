@@ -51,9 +51,12 @@ export default function MobileBottomNav() {
 
   useEffect(() => {
     const onDocClick = (e) => {
-      if (menuWrapRef.current && !menuWrapRef.current.contains(e.target)) setMenuOpen(false);
-      if (searchWrapRef.current && !searchWrapRef.current.contains(e.target)) setSearchOpen(false);
-      if (cartWrapRef.current && !cartWrapRef.current.contains(e.target)) setCartOpen(false);
+      if (menuWrapRef.current && !menuWrapRef.current.contains(e.target))
+        setMenuOpen(false);
+      if (searchWrapRef.current && !searchWrapRef.current.contains(e.target))
+        setSearchOpen(false);
+      if (cartWrapRef.current && !cartWrapRef.current.contains(e.target))
+        setCartOpen(false);
     };
     document.addEventListener("mousedown", onDocClick);
     return () => document.removeEventListener("mousedown", onDocClick);
@@ -64,176 +67,206 @@ export default function MobileBottomNav() {
     const query = q.trim();
     if (!query) return;
     setSearchOpen(false);
+    setMenuOpen(false);
+    setCartOpen(false);
     navigate(`/search?q=${encodeURIComponent(query)}`);
   };
 
-  // ✅ اینجا return null کاملاً درست و بدون مشکل Hook
+  const closeAll = () => {
+    setMenuOpen(false);
+    setSearchOpen(false);
+    setCartOpen(false);
+  };
+
+  const isActive = (path) => location.pathname === path;
+
+  // ✅ اینجا return null کاملاً درست
   if (isAuthPage) return null;
+
+  // ✅ اندازه‌ها رو یکدست کن
+  const BTN = "w-11 h-11";
+  const ICON = 22;
+
+  const btnClass = (active) => `
+    ${BTN}
+    flex items-center justify-center rounded-[10px]
+    transition
+    ${active ? "bg-[#2A3E63] text-white" : "text-black"}
+  `;
 
   return (
     <nav
       className="
-        fixed
-        inset-x-0 mr-24 md:mr-0
-        bottom-4
-        z-50
-        lg:hidden
-        flex
-        justify-center
+        fixed  bottom-0 z-50 lg:hidden w-full flex items-center justify-center
+        pb-[max(env(safe-area-inset-bottom),12px)]
       "
     >
-      <div
-        className="
-          flex items-center gap-4
-          bg-[#ffffff]
-          px-8 py-3 md:px-20
-          rounded-[10px]
-          shadow-lg
-        "
-      >
-        {/* ⬅️ LEFT : Cart */}
-        <div ref={cartWrapRef} className="relative">
-          <button
-            type="button"
-            onClick={() => {
-              setMenuOpen(false);
-              setSearchOpen(false);
-              setCartOpen((v) => !v);
-            }}
-            className={`
-              w-11 h-11 flex items-center justify-center rounded-[10px]
-              ${cartOpen ? "bg-[#2A3E63] text-white" : "text-black"}
-            `}
-          >
-            <ShoppingCart size={22} />
-          </button>
-
-          <CartDropdown
-            open={cartOpen}
-            cartItems={cartItems}
-            onClose={() => setCartOpen(false)}
-          />
-        </div>
-
-        {/* ⬅️ LEFT : Search */}
-        <div ref={searchWrapRef} className="relative">
-          <button
-            type="button"
-            onClick={() => {
-              setMenuOpen(false);
-              setCartOpen(false);
-              setSearchOpen((v) => !v);
-            }}
-            className={`
-              w-11 h-11 flex items-center justify-center rounded-[10px]
-              ${searchOpen ? "bg-[#2A3E63] text-white" : "text-black"}
-            `}
-          >
-            <Search size={22} />
-          </button>
-
+      <div className="w-full px-4 flex items-center justify-center">
+        {/* ✅ هم‌عرض بقیه سکشن‌ها + وسط‌چین واقعی */}
+        <div
+          className="
+            mx-auto
+            max-w-7xl
+            flex justify-center
+          "
+        >
           <div
-            className={`
-              absolute bottom-14 left-18 -translate-x-1/2
-              w-[260px] bg-white rounded-[10px] shadow-lg p-3
-              transition-all duration-200
-              ${searchOpen ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"}
-            `}
+            className="
+              relative
+              w-full
+              sm:w-auto
+              flex items-center justify-between
+              gap-3
+              bg-white
+              px-4 py-3
+              rounded-[10px]
+              shadow-lg
+            "
           >
-            <form onSubmit={submitSearch} className="flex items-center gap-2">
-              <input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder="Search for products..."
-                className="w-full border rounded-xl px-3 py-2 text-sm outline-none"
-              />
+            {/* Cart */}
+            <div ref={cartWrapRef} className="relative">
               <button
-                type="submit"
-                className="px-3 py-2 rounded-xl bg-[#2A3E63] text-white text-sm"
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  setSearchOpen(false);
+                  setCartOpen((v) => !v);
+                }}
+                className={btnClass(cartOpen)}
+                aria-label="cart"
               >
-                Go
+                <ShoppingCart size={ICON} />
               </button>
-            </form>
 
-            {q.trim() && (
-              <div className="mt-3">
-                {suggestions.map((p) => (
+              <CartDropdown
+                open={cartOpen}
+                cartItems={cartItems}
+                onClose={() => setCartOpen(false)}
+              />
+            </div>
+
+            {/* Search */}
+            <div ref={searchWrapRef} className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  setCartOpen(false);
+                  setSearchOpen((v) => !v);
+                }}
+                className={btnClass(searchOpen)}
+                aria-label="search"
+              >
+                <Search size={ICON} />
+              </button>
+
+              <div
+                className={`
+                  absolute bottom-14 left-20 -translate-x-1/2
+                  w-[260px] bg-white rounded-[10px] shadow-lg p-3
+                  transition-all duration-200
+                  ${
+                    searchOpen
+                      ? "opacity-100 visible"
+                      : "opacity-0 invisible pointer-events-none"
+                  }
+                `}
+              >
+                <form onSubmit={submitSearch} className="flex items-center gap-2">
+                  <input
+                    value={q}
+                    onChange={(e) => setQ(e.target.value)}
+                    placeholder="Search for products..."
+                    className="w-full border rounded-xl px-3 py-2 text-sm outline-none"
+                  />
                   <button
-                    key={p.id}
-                    onClick={() => {
-                      setSearchOpen(false);
-                      navigate(`/search?q=${encodeURIComponent(q.trim())}`);
-                    }}
-                    className="block w-full text-left text-[13px] px-2 py-2 rounded-lg hover:bg-gray-50"
+                    type="submit"
+                    className="px-3 py-2 rounded-xl bg-[#2A3E63] text-white text-sm"
                   >
-                    {p.title}
+                    Go
                   </button>
+                </form>
+
+                {q.trim() && (
+                  <div className="mt-3">
+                    {suggestions.map((p) => (
+                      <button
+                        key={p.id}
+                        onClick={() => {
+                          closeAll();
+                          navigate(`/search?q=${encodeURIComponent(q.trim())}`);
+                        }}
+                        type="button"
+                        className="block w-full text-left text-[13px] px-2 py-2 rounded-lg hover:bg-gray-50"
+                      >
+                        {p.title}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Home (هم‌اندازه بقیه + بک‌گراند یکسان) */}
+            <Link
+              to="/"
+              onClick={closeAll}
+              className={btnClass(isActive("/"))}
+              aria-label="home"
+            >
+              <Home size={ICON} />
+            </Link>
+
+            {/* Account */}
+            <Link
+              to="/account"
+              onClick={closeAll}
+              className={btnClass(isActive("/account"))}
+              aria-label="account"
+            >
+              <User size={ICON} />
+            </Link>
+
+            {/* Categories */}
+            <div ref={menuWrapRef} className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchOpen(false);
+                  setCartOpen(false);
+                  setMenuOpen((v) => !v);
+                }}
+                className={btnClass(menuOpen)}
+                aria-label="categories"
+              >
+                <Menu size={ICON} />
+              </button>
+
+              <div
+                className={`
+                  absolute bottom-14 right-0
+                  w-[220px] text-[13px]
+                  bg-white rounded-[10px] shadow-lg p-3
+                  transition-all duration-200
+                  ${
+                    menuOpen
+                      ? "opacity-100 visible"
+                      : "opacity-0 invisible pointer-events-none"
+                  }
+                `}
+              >
+                {categories.map((cat) => (
+                  <Link
+                    key={cat.slug}
+                    to={`/store/${cat.slug}`}
+                    onClick={() => setMenuOpen(false)}
+                    className="block py-2"
+                  >
+                    {cat.title}
+                  </Link>
                 ))}
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* 🟢 CENTER : Home */}
-        <Link
-          to="/"
-          className={`
-            w-12 h-12
-            flex items-center justify-center
-            rounded-[10px]
-            ${location.pathname === "/" ? "bg-[#2A3E63] text-white" : "text-black"}
-          `}
-        >
-          <Home size={24} />
-        </Link>
-
-        {/* ➡️ RIGHT : Account */}
-        <Link
-          to="/account"
-          className={`
-            w-11 h-11
-            flex items-center justify-center
-            rounded-[10px]
-            ${location.pathname === "/account" ? "bg-[#2A3E63] text-white" : "text-black"}
-          `}
-        >
-          <User size={22} />
-        </Link>
-
-        {/* ➡️ RIGHT : Categories */}
-        <div ref={menuWrapRef} className="relative">
-          <button
-            onClick={() => {
-              setSearchOpen(false);
-              setCartOpen(false);
-              setMenuOpen((v) => !v);
-            }}
-            className={`
-              w-11 h-11 flex items-center justify-center rounded-[10px]
-              ${menuOpen ? "bg-[#2A3E63] text-white" : "text-black"}
-            `}
-          >
-            <Menu size={22} />
-          </button>
-
-          <div
-            className={`
-              absolute bottom-14 right-0
-              w-[220px] text-[13px]
-              bg-white rounded-[10px] shadow-lg p-3
-              ${menuOpen ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"}
-            `}
-          >
-            {categories.map((cat) => (
-              <Link
-                key={cat.slug}
-                to={`/store/${cat.slug}`}
-                onClick={() => setMenuOpen(false)}
-                className="block py-2"
-              >
-                {cat.title}
-              </Link>
-            ))}
+            </div>
           </div>
         </div>
       </div>

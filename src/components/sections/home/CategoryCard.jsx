@@ -3,15 +3,15 @@ export default function CategoryCard({ title, img }) {
     <div
       className="
         bg-white
-        w-full
-        h-[115px]
+        w-[98%]
+        h-[85px]
         sm:h-[140px]
         md:h-[185px]
         rounded-[5px]
         shadow-sm
         flex flex-col
         items-center
-        justify-end
+        justify-end 
         p-3
         sm:p-4
       "
@@ -20,16 +20,16 @@ export default function CategoryCard({ title, img }) {
         src={img}
         alt={title}
         className="
-          w-[55px]
-          sm:w-[80px]
-          md:w-[110px]
-          lg:w-[120px]
+          w-8
+          sm:w-20
+          md:w-[90px]
           h-auto
           object-contain
         "
+        draggable={false}
       />
 
-      <p className="text-center text-[11px] sm:text-[12px] md:text-[14px] mt-1 w-full">
+      <p className="text-center text-[11px] sm:text-[12px] md:text-[14px] mt-1 w-full line-clamp-1">
         {title}
       </p>
     </div>

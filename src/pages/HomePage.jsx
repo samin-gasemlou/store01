@@ -1,6 +1,5 @@
 import Hero from "../components/sections/home/Hero"
 import HomeCategories from "../components/sections/home/HomeCategories"
-import MenCollection from "../components/sections/home/MenCollection"
 import Banners from "../components/sections/home/Banners"
 import WomenCollection from "../components/sections/home/WomenCollection"
 import Recommend from "../components/sections/home/Recommend"
@@ -9,8 +8,12 @@ import Navbar from "../components/layout/Navbar"
 import SponsorSlider from "../components/sections/home/SponsorSlider"
 import Footer from "../components/layout/Footer"
 import DiscountSection from "../components/sections/home/DiscountSection"
+import ProductCarousel from "../components/common/ProductCarousel"
+import { products } from "../data/products"
 
 function HomePage() {
+
+
 
   return (
   
@@ -18,7 +21,12 @@ function HomePage() {
     <Navbar />
     <Hero/>
     <HomeCategories/>
-    <MenCollection />
+    <ProductCarousel 
+      items={products}
+      baseCount={4}
+      mobileStep={2}
+      desktopStep={5}
+      imageSrc="/menn.png" />
     <Banners />
     <DiscountSection />
     <WomenCollection />

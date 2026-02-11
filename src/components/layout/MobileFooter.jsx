@@ -1,6 +1,6 @@
 export default function MobileFooter() {
   return (
-    <footer className="w-full bg-transparent md:hidden pt-24 pb-10 relative">
+    <footer className="w-full bg-transparent md:hidden pt-24 pb-30 relative">
       <img src="/leaf.svg" className="absolute top-0 left-0" alt="" />
 
       {/* === Top Trapezoid / Capsule Shape === */}

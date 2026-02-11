@@ -7,7 +7,7 @@ export default function AuthInput({ placeholder, type = "text", value, onChange 
       placeholder={placeholder}
       className="
         w-full
-        bg-[#ECECEC]
+        bg-[#F2F3F5]
         rounded-[14px]
         px-6
         py-5

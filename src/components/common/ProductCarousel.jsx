@@ -1,14 +1,12 @@
-// WomenCollection.jsx
 import { useEffect, useMemo, useRef, useState } from "react";
-import ProductCard from "../../common/ProductCard";
-import { products } from "../../../data/products";
+import ProductCard from "./ProductCard";
 
-export default function WomenCollection({
-  items = products,
+export default function MenCollection({
+  items = [],
   baseCount = 5,
   mobileStep = 2,
-  desktopStep = 4,
-  imageSrc = "/womenn.png",
+  desktopStep = 5,
+  imageSrc = "/menn.png",
 }) {
   const sliderRef = useRef(null);
   const firstItemRef = useRef(null);
@@ -27,10 +25,11 @@ export default function WomenCollection({
   const segmentWidthRef = useRef(0);
   const rafRef = useRef(null);
 
+  // اندازه‌گیری عرض کارت
   useEffect(() => {
     const calc = () => {
       if (!firstItemRef.current) return;
-      const cardWidth = firstItemRef.current.offsetWidth + 20; // gap-5 => 20px
+      const cardWidth = firstItemRef.current.offsetWidth + 20;
       setCardStep(cardWidth);
       segmentWidthRef.current = cardWidth * baseItems.length;
     };
@@ -40,6 +39,7 @@ export default function WomenCollection({
     return () => window.removeEventListener("resize", calc);
   }, [baseItems.length]);
 
+  // شروع از وسط
   useEffect(() => {
     const el = sliderRef.current;
     if (!el || !baseItems.length) return;
@@ -53,6 +53,7 @@ export default function WomenCollection({
     return () => clearTimeout(t);
   }, [baseItems.length]);
 
+  // Loop هنگام اسکرول
   const onScroll = () => {
     const el = sliderRef.current;
     if (!el || !baseItems.length) return;
@@ -92,6 +93,7 @@ export default function WomenCollection({
     const THRESHOLD = 6;
 
     const onDown = (e) => {
+      // اگر روی لینک یا دکمه کلیک شد، drag شروع نشه
       if (e.target.closest("button,a")) return;
 
       isDown = true;
@@ -105,7 +107,10 @@ export default function WomenCollection({
 
       const dx = e.clientX - startX;
 
-      if (!moved && Math.abs(dx) > THRESHOLD) moved = true;
+      if (!moved && Math.abs(dx) > THRESHOLD) {
+        moved = true;
+      }
+
       if (!moved) return;
 
       el.scrollLeft = startLeft - dx;
@@ -136,7 +141,8 @@ export default function WomenCollection({
     <section className="w-full relative overflow-x-hidden md:mb-20">
       <div className="w-full mx-auto px-2">
         <div className="flex flex-col md:flex-row items-center gap-4">
-          {/* ✅ کارت‌ها سمت چپ */}
+          <ImageBlock imageSrc={imageSrc} />
+
           <div className="w-full md:flex-1 relative min-w-0">
             <Header
               onLeft={() => scrollByStep(-1)}
@@ -155,8 +161,8 @@ export default function WomenCollection({
                   className="
                     shrink-0
                     w-[calc((100%-20px)/2)]
-                    md:w-[calc((100%-40px)/3)]
-                    lg:w-[calc((100%-60px)/5)]
+                    md:w-[calc((100%-20px)/2)]
+                    lg:w-[calc((100%-90px)/5)]
                   "
                 >
                   <ProductCard {...item} />
@@ -164,9 +170,6 @@ export default function WomenCollection({
               ))}
             </div>
           </div>
-
-          {/* ✅ تصویر سمت راست در دسکتاپ */}
-          <ImageBlock imageSrc={imageSrc} />
         </div>
       </div>
     </section>
@@ -175,15 +178,17 @@ export default function WomenCollection({
 
 function Header({ onLeft, onRight }) {
   return (
-    <div className="flex w-full items-center justify-between mb-2 pt-4">
-      <h2 className="text-[18px] sm:text-[20px] md:text-[24px]">Just Landed</h2>
+    <div className="flex w-full justify-start md:gap-4 gap-10 mb-2 pt-4">
+      <h2 className="text-[18px] sm:text-[20px] md:text-[24px]">
+        Most Wanted Collection
+      </h2>
 
       <div className="flex gap-2 shrink-0">
-        <button onClick={onLeft} type="button" className="w-9 h-9">
-          <img src="/arrow-circle-left.svg" alt="" />
+        <button onClick={onLeft} type="button">
+          <img src="/arrow-circle-left.svg" className="w-6 md:w-full" alt="" />
         </button>
-        <button onClick={onRight} type="button" className="w-9 h-9">
-          <img src="/arrow-circle-left3.svg" alt="" />
+        <button onClick={onRight} type="button">
+          <img src="/arrow-circle-left3.svg" className="w-6 md:w-full" alt="" />
         </button>
       </div>
     </div>

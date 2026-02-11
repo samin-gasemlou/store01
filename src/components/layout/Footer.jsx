@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="absolute md:-top-8 top-0 left-1/2 -translate-x-1/2 z-20">
         <div
           className="
-            bg-transparent
+            bg-[#f2f3f5]
             rounded-b-3xl
             px-16
             md:py-4 py-2

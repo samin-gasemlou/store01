@@ -13,9 +13,7 @@ export default function CartDropdown({ open, cartItems, onClose }) {
     <div
       className="
         absolute
-        bottom-14
-        left-32
-        -translate-x-1/2
+        bottom-14 left-0
         w-[260px]
         bg-white
         rounded-[10px]
@@ -33,14 +31,17 @@ export default function CartDropdown({ open, cartItems, onClose }) {
             {cartItems.map((item) => (
               <div key={item.id} className="flex items-center gap-3 py-2">
                 <div className="w-12 h-12 bg-[#F4F5F7] rounded-[10px] flex items-center justify-center overflow-hidden">
-                  <img src={item.img} alt="" className="w-10 h-10 object-contain" />
+                  <img
+                    src={item.img}
+                    alt=""
+                    className="w-10 h-10 object-contain"
+                    draggable={false}
+                  />
                 </div>
 
                 <div className="flex-1">
                   <p className="text-[13px] leading-5">{item.title}</p>
-                  <p className="text-[12px] text-gray-500">
-                    Qty: {item.qty}
-                  </p>
+                  <p className="text-[12px] text-gray-500">Qty: {item.qty}</p>
                 </div>
 
                 <p className="text-[12px] font-semibold text-[#2A3E63]">
@@ -57,23 +58,21 @@ export default function CartDropdown({ open, cartItems, onClose }) {
             </p>
           </div>
 
-          <div className="mt-3 flex gap-2">
+          <div className="mt-3">
             <Link
-  to="/checkout"
-  onClick={onClose}
-  className="
-    w-full
-    text-center
-    rounded-[10px]
-    bg-[#2A3E63]
-    text-white
-    py-2
-    text-[13px]
-  "
->
-  Payment
-</Link>
-
+              to="/checkout"
+              onClick={onClose}
+              className="
+                w-full block text-center
+                rounded-[10px]
+                bg-[#2A3E63]
+                text-white
+                py-2
+                text-[13px]
+              "
+            >
+              Payment
+            </Link>
           </div>
         </>
       )}

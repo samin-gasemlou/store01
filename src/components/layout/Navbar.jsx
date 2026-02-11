@@ -16,12 +16,12 @@ export default function Navbar() {
     <header className="w-full md:py-6 absolute top-14 md:top-0 md:relative z-50">
       <MobileTopBar />
       {/* BG */}
-      <div className="absolute  w-[605px] h-[705px] right-[-100px] top-[-253px] bg-[radial-gradient(50%_50%_at_50%_50%,rgba(43,65,104,0.15)_0%,rgba(43,65,104,0)_100%)] -z-10" />
+      <div className="absolute hidden md:block w-[705px] h-[705px] right-[-100px] top-[-253px] bg-[radial-gradient(50%_50%_at_50%_50%,rgba(43,65,104,0.15)_0%,rgba(43,65,104,0)_100%)] -z-40" />
 
-      <div className="max-w-[1400px] hidden mx-auto md:flex items-center justify-between px-4 sm:px-6">
+      <div className="w-full hidden mx-auto md:flex items-center justify-between px-4 sm:px-6">
         {/* LEFT */}
         <div className="flex items-center gap-4 sm:gap-10">
-          <img src="/logo.svg" alt="logo" />
+          <Link to="/"><img src="/logo.svg" alt="logo" /></Link>
 
           {/* Language */}
           <div

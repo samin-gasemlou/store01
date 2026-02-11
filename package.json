@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.17",
+    "embla-carousel": "^8.6.0",
+    "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.29.3",
     "lucide-react": "^0.555.0",
     "react": "^19.2.0",

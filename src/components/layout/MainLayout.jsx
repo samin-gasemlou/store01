@@ -22,7 +22,7 @@ function Footer() {
 
 export default function AppLayout({ children }) {
   return (
-    <div className="min-h-dvh bg-gray-50 text-gray-900">
+    <div className="min-h-dvh bg-[#f2f3f5] text-gray-900">
       <Header />
      
 
