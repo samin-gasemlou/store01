@@ -1,8 +1,10 @@
 import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 
 export default function ProductInfo({ product }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const [size, setSize] = useState("90 ml");
   const [qty, setQty] = useState(1);
@@ -44,7 +46,12 @@ export default function ProductInfo({ product }) {
 
     localStorage.setItem("cart", JSON.stringify(cart));
     window.dispatchEvent(new Event("cartUpdated"));
-    alert(t("single.addedToCart"));
+  };
+
+  // ✅ BUY NOW: اول اضافه به سبد، بعد برو checkout
+  const buyNow = () => {
+    addToCart();
+    navigate("/checkout");
   };
 
   return (
@@ -167,7 +174,10 @@ export default function ProductInfo({ product }) {
 
       <div className="w-full flex items-center gap-2 sm:gap-3">
         <button
-          onClick={addToCart}
+          onClick={() => {
+            addToCart();
+            alert(t("single.addedToCart"));
+          }}
           type="button"
           className="
             flex-1
@@ -188,6 +198,7 @@ export default function ProductInfo({ product }) {
         </button>
 
         <button
+          onClick={buyNow}
           type="button"
           className="
             flex-1

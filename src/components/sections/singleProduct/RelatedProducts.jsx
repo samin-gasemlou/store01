@@ -50,7 +50,7 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
     return () => window.removeEventListener("resize", calc);
   }, [baseProducts.length]);
 
-  // ✅ شروع از وسط
+  // ✅ شروع از وسط (با دو RAF برای اطمینان)
   useEffect(() => {
     const el = sliderRef.current;
     if (!el || !baseProducts.length) return;
@@ -58,13 +58,18 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
     const seg = segmentWidthRef.current;
     if (!seg) return;
 
-    // next tick => scrollWidth آماده
+    el.classList.remove("scroll-smooth");
     requestAnimationFrame(() => {
-      el.scrollLeft = seg;
+      requestAnimationFrame(() => {
+        el.scrollLeft = seg;
+        requestAnimationFrame(() => {
+          el.classList.add("scroll-smooth");
+        });
+      });
     });
   }, [baseProducts.length]);
 
-  // ✅ infinite loop (scrollLeft همیشه LTR هست => پایدار)
+  // ✅ infinite loop (همیشه LTR)
   const onScroll = () => {
     const el = sliderRef.current;
     if (!el) return;
@@ -96,7 +101,7 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
     });
   };
 
-  // ✅ group scroll (LTR واقعی، ولی RTL باید جهت برعکس شود)
+  // ✅ اسکرول گروهی (LTR واقعی)
   const scrollByGroup = (dir = 1) => {
     const el = sliderRef.current;
     const item = firstItemRef.current;
@@ -106,7 +111,7 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
     const cardWidth = item.offsetWidth + gap;
     const step = window.innerWidth < 768 ? 2 : 4;
 
-    // مهم: چون layout در RTL row-reverse میشه، حرکت منطقی باید برعکس شه
+    // چون در RTL ظاهر mirror شده، برای حس درست باید جهت برعکس بشه
     const direction = isRTL ? -dir : dir;
 
     el.scrollBy({
@@ -128,7 +133,7 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isRTL]);
 
-  // ✅ Drag (LTR scroll mechanics, RTL drag حس طبیعی)
+  // ✅ Drag (LTR scroll, ولی RTL حس دست درست)
   useEffect(() => {
     const el = sliderRef.current;
     if (!el) return;
@@ -158,9 +163,8 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
       if (!moved) return;
 
       // LTR: startLeft - dx
-      // RTL (row-reverse): حس طبیعی با +dx
+      // RTL (mirror): startLeft + dx
       el.scrollLeft = isRTL ? startLeft + dx : startLeft - dx;
-
       e.preventDefault();
     };
 
@@ -187,19 +191,16 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
 
   if (!baseProducts.length) return null;
 
-  // ✅ Icons swap in RTL
+  // ✅ آیکون‌ها در RTL برعکس
   const prevIcon = "/arrow-circle-left.svg";
   const nextIcon = "/arrow-circle-left3.svg";
-
   const leftIcon = isRTL ? nextIcon : prevIcon;
   const rightIcon = isRTL ? prevIcon : nextIcon;
 
   return (
     <section className="w-full px-4 mt-6 mb-24 overflow-x-hidden">
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-lg md:text-xl font-semibold">
-          {t("single.related")}
-        </h3>
+        <h3 className="text-lg md:text-xl font-semibold">{t("single.related")}</h3>
 
         <div className="flex gap-2 shrink-0">
           <button
@@ -220,9 +221,7 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
         </div>
       </div>
 
-      {/* ✅ مهم‌ترین نکته:
-          اسکرولر همیشه dir="ltr" می‌مونه تا scrollLeft سالم باشه
-          ولی برای RTL فقط کارت‌ها row-reverse میشن */}
+      {/* ✅ کلیدی‌ترین بخش: اسکرولر LTR، ولی در RTL mirror میشه */}
       <div
         ref={sliderRef}
         dir="ltr"
@@ -231,14 +230,19 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
           flex gap-6 overflow-x-auto no-scrollbar
           scroll-smooth snap-x snap-mandatory
           select-none cursor-grab active:cursor-grabbing
-          ${isRTL ? "flex-row-reverse" : "flex-row"}
+          ${isRTL ? "-scale-x-100" : ""}
         `}
       >
         {loopProducts.map((product, index) => (
           <div
             key={`${product?.id ?? "p"}-${index}`}
             ref={index === 0 ? firstItemRef : null}
-            className="shrink-0 snap-start w-[calc((100%-24px)/2)] md:w-[calc((100%-120px)/5)]"
+            className={`
+              shrink-0 snap-start
+              w-[calc((100%-24px)/2)]
+              md:w-[calc((100%-120px)/5)]
+              ${isRTL ? "-scale-x-100" : ""}
+            `}
           >
             <ProductCard {...product} />
           </div>

@@ -41,7 +41,7 @@ export default function SingleProduct() {
 
         <div className="flex flex-col md:flex-row gap-4 md:gap-10 items-start">
           <div className="w-full md:w-[52%]">
-            <div className="bg-white rounded-3xl p-4 sm:p-6 shadow-sm flex justify-center w-full">
+            <div className="bg-white rounded-[10px] p-4 sm:p-6 shadow-sm flex justify-center w-full">
               <img
                 src={images[activeImg]}
                 alt={title}
