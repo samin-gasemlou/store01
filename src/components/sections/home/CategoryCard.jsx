@@ -3,27 +3,33 @@ export default function CategoryCard({ title, img }) {
     <div
       className="
         bg-white
-        md:w-[185px] w-full
-        max-w-40
-        h-[120px] md:h-[185px]
+        w-full
+        h-[115px]
+        sm:h-[140px]
+        md:h-[185px]
         rounded-[5px]
         shadow-sm
-        flex flex-col items-center
+        flex flex-col
+        items-center
         justify-end
-        p-4
+        p-3
+        sm:p-4
       "
     >
       <img
         src={img}
         alt={title}
         className="
-          w-[50px] sm:w-[100px] md:w-[120px]
+          w-[55px]
+          sm:w-[80px]
+          md:w-[110px]
+          lg:w-[120px]
           h-auto
           object-contain
         "
       />
 
-      <p className="text-center text-[11px] md:text-[14px] mt-0 w-full">
+      <p className="text-center text-[11px] sm:text-[12px] md:text-[14px] mt-1 w-full">
         {title}
       </p>
     </div>

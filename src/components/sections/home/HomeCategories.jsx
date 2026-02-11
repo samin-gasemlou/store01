@@ -1,67 +1,120 @@
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import CategoryCard from "./CategoryCard";
 import { categories } from "./data";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function HomeCategories() {
-  const [index, setIndex] = useState(0);
-  const containerRef = useRef(null);
+  const trackRef = useRef(null);
+  const itemRefs = useRef([]);
 
-  const visibleCount = 4; // تعداد کارت قابل نمایش در موبایل
-  const [cardWidth, setCardWidth] = useState(0);
+  const [active, setActive] = useState(0);
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth < 640 : true
+  );
 
-  // گرفتن عرض هر کارت بعد از رندر
   useEffect(() => {
-    if (containerRef.current) {
-      const firstCard = containerRef.current.children[0];
-      if (firstCard) setCardWidth(firstCard.offsetWidth + 32); // gap=8 => 32px در 4 کارت
-    }
+    const onResize = () => {
+      const mobile = window.innerWidth < 640;
+      setIsMobile(mobile);
+      if (!mobile) setActive(0);
+    };
+
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
+  const scrollToIndex = (i) => {
+    const el = trackRef.current;
+    const item = itemRefs.current[i];
+    if (!el || !item) return;
+
+    el.scrollTo({
+      left: item.offsetLeft,
+      behavior: "smooth",
+    });
+  };
+
+  const maxIndex = Math.max(0, categories.length - 2); // موبایل: 2 کارت همزمان
+
   const prev = () => {
-    setIndex((prev) => Math.max(prev - 1, 0));
+    const nextIndex = Math.max(active - 1, 0);
+    setActive(nextIndex);
+    scrollToIndex(nextIndex);
   };
 
   const next = () => {
-    setIndex((prev) =>
-      Math.min(prev + 1, categories.length - visibleCount)
-    );
+    const nextIndex = Math.min(active + 1, maxIndex);
+    setActive(nextIndex);
+    scrollToIndex(nextIndex);
   };
 
   return (
-    <section className="w-full flex items-center justify-center py-8 md:py-12 bg-transparent sm:mt-8 md:mb-16 relative z-50">
-      {/* فلش‌ها فقط موبایل */}
-      {categories.length > visibleCount && (
+    <section className="w-full  py-8 md:py-12  sm:mt-8 md:mb-16 relative z-50">
+      {/* ✅ فلش‌ها فقط موبایل */}
+      {isMobile && categories.length > 2 && (
         <>
           <button
             onClick={prev}
             className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-white p-2 rounded-full shadow-md sm:hidden"
+            aria-label="Previous categories"
           >
             <ChevronLeft size={24} />
           </button>
+
           <button
             onClick={next}
             className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-white p-2 rounded-full shadow-md sm:hidden"
+            aria-label="Next categories"
           >
             <ChevronRight size={24} />
           </button>
         </>
       )}
 
-      <div className="w-full max-w-7xl mx-auto px-4 overflow-hidden">
+      {/* ✅ هم‌عرض با بقیه سکشن‌ها */}
+      <div className="w-full  mx-auto px-4">
+        {/* ✅ MOBILE: اسلایدر تمام عرض داخل container */}
         <div
-          ref={containerRef}
-          className="flex md:gap-8 gap-3 transition-transform duration-300 ease-in-out sm:grid sm:grid-cols-3 lg:grid-cols-6"
-          style={{
-            transform: `translateX(-${index * cardWidth}px)`,
-          }}
+          ref={trackRef}
+          className="
+            flex
+            gap-3
+            sm:gap-4
+            overflow-hidden
+            sm:hidden
+          "
+        >
+          {categories.map((item, i) => (
+            <Link
+              key={item.id}
+              to={`/store/${encodeURIComponent(item.title)}`}
+              className="shrink-0 w-[48%]"
+              ref={(el) => (itemRefs.current[i] = el)}
+            >
+              <CategoryCard {...item} />
+            </Link>
+          ))}
+        </div>
+
+        {/* ✅ sm+ : grid تمام عرض */}
+        <div
+          className="
+            hidden sm:grid
+            sm:grid-cols-3
+            md:grid-cols-4
+            lg:grid-cols-6
+            gap-4
+            md:gap-6
+            lg:gap-8
+          "
         >
           {categories.map((item) => (
             <Link
               key={item.id}
               to={`/store/${encodeURIComponent(item.title)}`}
-              className="shrink-0 w-[45%] sm:w-full md:w-full"
+              className="w-full"
             >
               <CategoryCard {...item} />
             </Link>

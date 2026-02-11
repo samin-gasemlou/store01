@@ -1,44 +1,150 @@
-import { useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import ProductCard from "../../common/ProductCard";
 import { products } from "../../../data/products";
 
 export default function MenCollection() {
   const sliderRef = useRef(null);
-  const cardRef = useRef(null);
+  const firstItemRef = useRef(null);
 
-  const scroll = (direction) => {
-    if (!sliderRef.current || !cardRef.current) return;
+  // ✅ فقط ۴ محصول
+  const baseItems = useMemo(() => products.slice(0, 4), []);
+  const loopItems = useMemo(
+    () => [...baseItems, ...baseItems, ...baseItems],
+    [baseItems]
+  );
 
-    const cardWidth = cardRef.current.offsetWidth + 20; // gap-5 => 20px
-    // موبایل: 2تا 2تا | دسکتاپ (md+): 4تا 4تا
+  const [cardStep, setCardStep] = useState(0);
+  const segmentWidthRef = useRef(0);
+  const rafRef = useRef(null);
+
+  // ✅ اندازه‌گیری عرض کارت + gap (gap-5 => 20px)
+  useEffect(() => {
+    const calc = () => {
+      if (!firstItemRef.current) return;
+      const cardWidth = firstItemRef.current.offsetWidth + 20;
+      setCardStep(cardWidth);
+      segmentWidthRef.current = cardWidth * baseItems.length; // ۴ کارت
+    };
+
+    calc();
+    window.addEventListener("resize", calc);
+    return () => window.removeEventListener("resize", calc);
+  }, [baseItems.length]);
+
+  // ✅ شروع از وسط
+  useEffect(() => {
+    const el = sliderRef.current;
+    if (!el) return;
+
+    const t = setTimeout(() => {
+      const seg = segmentWidthRef.current;
+      if (!seg) return;
+      el.scrollLeft = seg;
+    }, 0);
+
+    return () => clearTimeout(t);
+  }, []);
+
+  // ✅ Loop هنگام اسکرول
+  const onScroll = () => {
+    const el = sliderRef.current;
+    if (!el) return;
+
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+
+    rafRef.current = requestAnimationFrame(() => {
+      const seg = segmentWidthRef.current;
+      if (!seg) return;
+
+      if (el.scrollLeft < seg * 0.5) el.scrollLeft += seg;
+      else if (el.scrollLeft > seg * 2.5) el.scrollLeft -= seg;
+    });
+  };
+
+  // ✅ دکمه‌ها (موبایل ۲تا۲تا، دسکتاپ ۴تا۴تا)
+  const scrollByStep = (direction) => {
+    const el = sliderRef.current;
+    if (!el || !cardStep) return;
+
     const step = window.innerWidth < 768 ? 2 : 4;
 
-    sliderRef.current.scrollBy({
-      left: direction * cardWidth * step,
+    el.scrollBy({
+      left: direction * cardStep * step,
       behavior: "smooth",
     });
   };
+
+  // ✅ Drag با دست و موس (Pointer)
+  useEffect(() => {
+    const el = sliderRef.current;
+    if (!el) return;
+
+    let isDown = false;
+    let startX = 0;
+    let startLeft = 0;
+
+    const onDown = (e) => {
+      isDown = true;
+      startX = e.clientX;
+      startLeft = el.scrollLeft;
+      el.setPointerCapture?.(e.pointerId);
+    };
+
+    const onMove = (e) => {
+      if (!isDown) return;
+      const dx = e.clientX - startX;
+      el.scrollLeft = startLeft - dx;
+    };
+
+    const onUp = () => {
+      isDown = false;
+    };
+
+    el.addEventListener("pointerdown", onDown, { passive: true });
+    el.addEventListener("pointermove", onMove, { passive: true });
+    el.addEventListener("pointerup", onUp, { passive: true });
+    el.addEventListener("pointercancel", onUp, { passive: true });
+    el.addEventListener("pointerleave", onUp, { passive: true });
+
+    return () => {
+      el.removeEventListener("pointerdown", onDown);
+      el.removeEventListener("pointermove", onMove);
+      el.removeEventListener("pointerup", onUp);
+      el.removeEventListener("pointercancel", onUp);
+      el.removeEventListener("pointerleave", onUp);
+    };
+  }, []);
 
   return (
     <section className="w-full relative overflow-x-hidden md:mb-20">
       <div className="w-full mx-auto px-4">
         <div className="flex flex-col md:flex-row items-center gap-4">
-          {/* ✅ عکس سمت چپ (در md+) */}
           <ImageBlock />
 
-          {/* کارت‌ها سمت راست */}
-          <div className="w-full md:w-[82%] relative">
-            <Header onLeft={() => scroll(-1)} onRight={() => scroll(1)} />
+          <div className="w-full md:flex-1 relative">
+            <Header
+              onLeft={() => scrollByStep(-1)}
+              onRight={() => scrollByStep(1)}
+            />
 
             <div
               ref={sliderRef}
-              className="flex gap-5 overflow-x-auto no-scrollbar snap-x py-2"
+              onScroll={onScroll}
+              className="flex gap-5 overflow-x-auto no-scrollbar py-2 cursor-grab active:cursor-grabbing"
             >
-              <div ref={cardRef} className="flex gap-4 snap-start">
-                {products.map((item) => (
-                  <ProductCard key={item.id} {...item} />
-                ))}
-              </div>
+              {loopItems.map((item, idx) => (
+                <div
+                  key={`${item.id}-${idx}`}
+                  ref={idx === 0 ? firstItemRef : null}
+                  className="
+                    shrink-0
+                    w-[calc((100%)/2)]
+                    md:w-[calc((100%-60px)/4)]
+                  "
+                >
+                  <ProductCard {...item} />
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -59,7 +165,7 @@ function Header({ onLeft, onRight }) {
           <img src="/arrow-circle-left.svg" alt="" />
         </button>
         <button onClick={onRight}>
-          <img src="/arrow-circle-left2.svg" alt="" />
+          <img src="/arrow-circle-left3.svg" alt="" />
         </button>
       </div>
     </div>
@@ -71,7 +177,7 @@ function ImageBlock() {
     <div className="hidden md:flex shrink-0">
       <img
         src="/menn.png"
-        className="w-[215px] h-[413px] object-cover rounded-[10px]"
+        className="w-[300px] h-[413px] object-cover rounded-[10px]"
         alt=""
       />
     </div>

@@ -9,8 +9,7 @@ export default function ProductCard({ id, title, img, price }) {
 
   const navigate = useNavigate();
 
-  const numericPrice =
-    Number(String(price).replace(/[^0-9.-]+/g, "")) || 0;
+  const numericPrice = Number(String(price).replace(/[^0-9.-]+/g, "")) || 0;
 
   const toggleWishlist = (e) => {
     e.preventDefault();
@@ -48,45 +47,55 @@ export default function ProductCard({ id, title, img, price }) {
   };
 
   return (
-    <Link to={`/product/${id}`} className="block shrink-0">
+    <Link to={`/product/${id}`} className="block w-full">
       <div
         className="
           bg-white
-          w-full md:w-[clamp(200px,48vw,230px)]
-          h-[328px]
+          w-full
+          h-[300px] sm:h-[318px] md:h-[328px]
           rounded-[10px]
           relative
-          p-4
-          shrink-0
+          p-3 sm:p-4
           overflow-hidden
         "
       >
         <img
           onClick={toggleWishlist}
           src={liked ? "/heart-fill.svg" : "/heart.svg"}
-          className="absolute top-4 left-4 w-5"
+          className="absolute top-3 left-3 sm:top-4 sm:left-4 w-4 sm:w-5"
           alt=""
         />
 
-        <div className="w-full flex justify-center mt-4">
-          <img src={img} className="h-40 object-contain" alt="" />
+        <div className="w-full flex justify-center mt-3 sm:mt-4">
+          <img
+            src={img}
+            className="h-32 sm:h-36 md:h-40 object-contain"
+            alt=""
+          />
         </div>
 
-        {/* 🔤 Title – responsive font */}
-        <p className="text-center mt-4 font-medium text-[14px] sm:text-[16px] md:text-[17px]">
+        <p className="text-center mt-3 sm:mt-4 font-medium text-[13px] sm:text-[15px] md:text-[17px]">
           {title}
         </p>
 
-        <div className="flex items-center justify-between mt-6">
+        <div className="flex items-center justify-between mt-4 sm:mt-6">
           <button
             onClick={addToCart}
-            className="bg-[#EFEFEF] w-12 h-12 rounded-xl flex items-center justify-center"
+            className="
+              bg-[#EFEFEF]
+              w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12
+              rounded-xl
+              flex items-center justify-center
+            "
           >
-            <img src="/shopping-cart.svg" className="w-5" alt="" />
+            <img
+              src="/shopping-cart.svg"
+              className="w-4 sm:w-[18px] md:w-5"
+              alt=""
+            />
           </button>
 
-          {/* 💰 Price – responsive font */}
-          <p className="text-[#2B4168] text-[14px] sm:text-[16px] md:text-[18px] font-semibold">
+          <p className="text-[#2B4168] text-[13px] sm:text-[15px] md:text-[18px] font-semibold">
             {numericPrice.toLocaleString()} Toman
           </p>
         </div>

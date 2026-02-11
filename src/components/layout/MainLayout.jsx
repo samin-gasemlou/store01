@@ -27,7 +27,7 @@ export default function AppLayout({ children }) {
      
 
       {/* main area */}
-      <main className="py-8">
+      <main className="py-2">
         <Container>
           {children}
         </Container>

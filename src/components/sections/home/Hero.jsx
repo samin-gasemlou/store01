@@ -1,15 +1,58 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { sliderData } from "./sliderData";
 
 export default function HeroSlider() {
   const [active, setActive] = useState(0);
 
-  const nextSlide = () => {
-    setActive((prev) => (prev === sliderData.length - 1 ? 0 : prev + 1));
+  // ✅ برای ESLint باید state باشه (نه ref در render)
+  const [dragging, setDragging] = useState(false);
+
+  const trackRef = useRef(null);
+
+  // drag refs (فقط برای نگهداری مقادیر)
+  const startXRef = useRef(0);
+  const isDownRef = useRef(false);
+
+  const goTo = (i) => {
+    const len = sliderData.length;
+    setActive((i + len) % len);
   };
 
-  const prevSlide = () => {
-    setActive((prev) => (prev === 0 ? sliderData.length - 1 : prev - 1));
+  const nextSlide = () => goTo(active + 1);
+  const prevSlide = () => goTo(active - 1);
+
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
+
+    const onDragStart = (e) => e.preventDefault();
+    el.addEventListener("dragstart", onDragStart);
+    return () => el.removeEventListener("dragstart", onDragStart);
+  }, []);
+
+  const onPointerDown = (e) => {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+
+    isDownRef.current = true;
+    setDragging(true);
+    startXRef.current = e.clientX;
+
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+  };
+
+  const onPointerUp = (e) => {
+    if (!isDownRef.current) return;
+
+    isDownRef.current = false;
+    setDragging(false);
+
+    const dx = e.clientX - startXRef.current;
+    const threshold = 45;
+
+    if (Math.abs(dx) < threshold) return;
+
+    if (dx < 0) nextSlide();
+    else prevSlide();
   };
 
   return (
@@ -27,29 +70,37 @@ export default function HeroSlider() {
           rounded-[10px]
           md:rounded-2xl
           bg-black
-          touch-manipulation
+          touch-pan-y
         "
       >
-        
-        {sliderData.map((item, index) => (
-          <img
-            key={item.id}
-            src={item.image}
-            alt=""
-            className={`
-              absolute inset-0 w-full h-full object-cover
-              transition-opacity duration-500 pointer-events-none
-              ${index === active ? "opacity-100" : "opacity-0"}
-            `}
-          />
-        ))}
+        {/* ✅ Track */}
+        <div
+          ref={trackRef}
+          onPointerDown={onPointerDown}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
+          className="absolute inset-0 flex h-full w-full"
+          style={{
+            transform: `translateX(-${active * 100}%)`,
+            transition: dragging ? "none" : "transform 450ms ease",
+          }}
+        >
+          {sliderData.map((item) => (
+            <div key={item.id} className="w-full h-full shrink-0">
+              <img
+                src={item.image}
+                alt=""
+                className="w-full h-full object-cover select-none pointer-events-none"
+              />
+            </div>
+          ))}
+        </div>
 
         {/* Buttons */}
-        <div className="flex items-center justify-between w-full z-50"></div>
         <button
           type="button"
           onClick={prevSlide}
-          className="absolute left-4 top-1/2 -translate-y-1/2 z-[60]
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-60
                      w-9 h-9 rounded-full bg-white/80
                      flex items-center justify-center
                      shadow hover:bg-white transition
@@ -61,8 +112,8 @@ export default function HeroSlider() {
         <button
           type="button"
           onClick={nextSlide}
-          className="absolute right-4 top-1/2 -translate-y-1/2
-                     w-9 h-9 rounded-full bg-white/80 z-[60]
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-60
+                     w-9 h-9 rounded-full bg-white/80
                      flex items-center justify-center
                      shadow hover:bg-white transition
                      pointer-events-auto select-none"
