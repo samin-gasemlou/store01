@@ -107,7 +107,7 @@ export default function MobileBottomNav() {
       "
     >
       <div className="w-full px-4 flex items-center justify-center">
-        <div className="mx-auto max-w-7xl flex justify-center">
+        <div className="mx-auto w-full flex justify-center">
           <div
             className="
               relative

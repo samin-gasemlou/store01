@@ -40,7 +40,7 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
       const item = firstItemRef.current;
       if (!item) return;
 
-      const gap = 24;
+      const gap = 24; // gap-6
       const cardWidth = item.offsetWidth + gap;
       segmentWidthRef.current = cardWidth * baseProducts.length;
     };
@@ -50,7 +50,7 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
     return () => window.removeEventListener("resize", calc);
   }, [baseProducts.length]);
 
-  // ✅ شروع از وسط (فقط یکبار)
+  // ✅ شروع از وسط
   useEffect(() => {
     const el = sliderRef.current;
     if (!el || !baseProducts.length) return;
@@ -58,10 +58,13 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
     const seg = segmentWidthRef.current;
     if (!seg) return;
 
-    el.scrollLeft = seg;
+    // next tick => scrollWidth آماده
+    requestAnimationFrame(() => {
+      el.scrollLeft = seg;
+    });
   }, [baseProducts.length]);
 
-  // ✅ infinite loop (بدون RTL math)
+  // ✅ infinite loop (scrollLeft همیشه LTR هست => پایدار)
   const onScroll = () => {
     const el = sliderRef.current;
     if (!el) return;
@@ -93,7 +96,7 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
     });
   };
 
-  // ✅ اسکرول گروهی — فقط جهت رو برعکس می‌کنیم
+  // ✅ group scroll (LTR واقعی، ولی RTL باید جهت برعکس شود)
   const scrollByGroup = (dir = 1) => {
     const el = sliderRef.current;
     const item = firstItemRef.current;
@@ -103,6 +106,7 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
     const cardWidth = item.offsetWidth + gap;
     const step = window.innerWidth < 768 ? 2 : 4;
 
+    // مهم: چون layout در RTL row-reverse میشه، حرکت منطقی باید برعکس شه
     const direction = isRTL ? -dir : dir;
 
     el.scrollBy({
@@ -121,9 +125,10 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
     }, AUTOPLAY_DELAY);
 
     return () => clearInterval(intervalRef.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isRTL]);
 
-  // ✅ Drag
+  // ✅ Drag (LTR scroll mechanics, RTL drag حس طبیعی)
   useEffect(() => {
     const el = sliderRef.current;
     if (!el) return;
@@ -142,6 +147,7 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
       startX = e.clientX;
       startLeft = el.scrollLeft;
       el.style.cursor = "grabbing";
+      el.setPointerCapture?.(e.pointerId);
     };
 
     const onMove = (e) => {
@@ -151,8 +157,10 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
       if (!moved && Math.abs(dx) > THRESHOLD) moved = true;
       if (!moved) return;
 
-      const direction = isRTL ? 1 : -1;
-      el.scrollLeft = startLeft + dx * direction;
+      // LTR: startLeft - dx
+      // RTL (row-reverse): حس طبیعی با +dx
+      el.scrollLeft = isRTL ? startLeft + dx : startLeft - dx;
+
       e.preventDefault();
     };
 
@@ -179,7 +187,7 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
 
   if (!baseProducts.length) return null;
 
-  // ✅ آیکون‌ها
+  // ✅ Icons swap in RTL
   const prevIcon = "/arrow-circle-left.svg";
   const nextIcon = "/arrow-circle-left3.svg";
 
@@ -187,9 +195,7 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
   const rightIcon = isRTL ? prevIcon : nextIcon;
 
   return (
-    <section
-      className="w-full px-4 mt-6 mb-24 overflow-x-hidden"
-    >
+    <section className="w-full px-4 mt-6 mb-24 overflow-x-hidden">
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-lg md:text-xl font-semibold">
           {t("single.related")}
@@ -214,16 +220,25 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
         </div>
       </div>
 
+      {/* ✅ مهم‌ترین نکته:
+          اسکرولر همیشه dir="ltr" می‌مونه تا scrollLeft سالم باشه
+          ولی برای RTL فقط کارت‌ها row-reverse میشن */}
       <div
         ref={sliderRef}
+        dir="ltr"
         onScroll={onScroll}
-        className="flex gap-6 overflow-x-auto no-scrollbar scroll-smooth select-none cursor-grab active:cursor-grabbing"
+        className={`
+          flex gap-6 overflow-x-auto no-scrollbar
+          scroll-smooth snap-x snap-mandatory
+          select-none cursor-grab active:cursor-grabbing
+          ${isRTL ? "flex-row-reverse" : "flex-row"}
+        `}
       >
         {loopProducts.map((product, index) => (
           <div
             key={`${product?.id ?? "p"}-${index}`}
             ref={index === 0 ? firstItemRef : null}
-            className="shrink-0 w-[calc((100%-24px)/2)] md:w-[calc((100%-120px)/5)]"
+            className="shrink-0 snap-start w-[calc((100%-24px)/2)] md:w-[calc((100%-120px)/5)]"
           >
             <ProductCard {...product} />
           </div>
