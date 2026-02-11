@@ -67,7 +67,7 @@ export default function ProductCard({ id, title, img, price }) {
         className="
           bg-white
           w-full h-[220px]
-          aspect-[4/5]
+          aspect-4/5
           md:h-[280px]
           lg:h-[340px]
           rounded-[10px]
