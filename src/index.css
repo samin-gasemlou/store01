@@ -1,17 +1,80 @@
 @import "tailwindcss";
 
-/* 🔒 ROOT OVERFLOW FIX */
+/* =========================
+   Fonts
+   ========================= */
+
+/* EN (بهتره یک family واحد داشته باشی) */
+@font-face {
+  font-family: "FontEN";
+  src: url("./fonts/en/Montserrat-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "FontEN";
+  src: url("./fonts/en/Montserrat-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "FontEN";
+  src: url("./fonts/en/Montserrat-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* AR */
+@font-face {
+  font-family: "FontAR";
+  src: url("./fonts/ar/ar-plain.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* KU (Sorani) */
+@font-face {
+  font-family: "FontKU";
+  src: url("./fonts/ar/ar-plain.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* =========================
+   Global base
+   ========================= */
 html,
 body {
   width: 100%;
   overflow-x: hidden;
 }
 
+@layer base {
+  /* مهم: روی html ست کن، body فقط inherit کنه */
+  html[lang^="en"] { font-family: "FontEN", system-ui, sans-serif; }
+  html[lang^="ar"] { font-family: "FontAR", sans-serif; }
+  html[lang^="ku"] { font-family: "FontKU", "FontAR", sans-serif; }
+
+  body { font-family: inherit; }
+}
+
+/* Optional smoothing */
+body {
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 #root {
   width: 100%;
   overflow-x: clip;
 }
-
 
 /* UTILITIES */
 .clip-trapezoid {
@@ -21,7 +84,6 @@ body {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
-
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;

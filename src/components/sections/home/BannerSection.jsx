@@ -1,7 +1,9 @@
 import { useTranslation } from "react-i18next";
 
 export default function BannerSection() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  const isRTL = i18n.dir() === "rtl";
 
   return (
     <section className="w-full relative md:mt-24 md:mb-26 mt-8 mb-0">
@@ -14,7 +16,7 @@ export default function BannerSection() {
         relative
       "
       >
-        {/* LEFT IMAGE + ORANGE BOX */}
+        {/* LEFT IMAGE + BG BOX */}
         <div
           className="
           relative 
@@ -23,17 +25,16 @@ export default function BannerSection() {
           mt-20 md:mt-0
         "
         >
-          {/* Orange BG */}
+          {/* BG Orange */}
           <div
-            className="
-            absolute bg-[#2B4168]
-    md:w-[700px] w-[350px] h-[230px]
-    rounded-br-3xl rounded-tr-3xl
-    top-10 left-0
-    -translate-x-1/2 md:translate-x-0
-    z-10
-     md:block
-          "
+            className={`
+              absolute bg-[#2B4168]
+              md:w-full  w-[350px] h-[230px]
+              top-10
+              z-10 md:block
+              ${isRTL ? "right-80 md:right-20 translate-x-1/2 rounded-bl-3xl rounded-tl-3xl"
+                       : "left-0 rounded-br-3xl rounded-tr-3xl"}
+            `}
           ></div>
 
           {/* Main Image */}
@@ -58,13 +59,12 @@ export default function BannerSection() {
           flex flex-col items-center
           justify-center 
           mt-80 md:mt-16
-          relative  
+          relative 
         "
         >
-          {/* Right Pattern */}
           <img src="/s.png" alt="" className="w-[190px]" />
 
-          <p className="text-gray-600 mt-4 text-sm sm:text-base text-center md:text-left">
+          <p className="text-gray-600 md:hidden mt-4 text-sm sm:text-base text-center md:text-left">
             {t("home.followUs")}
           </p>
         </div>

@@ -5,6 +5,86 @@ import { useTranslation } from "react-i18next";
 
 const AUTOPLAY_DELAY = 4000;
 
+/**
+ * ✅ RTL-safe scroll helpers
+ * normalizedLeft همیشه مثل LTR معنی میده:
+ * 0 = چپ‌ترین، max = راست‌ترین (صرف نظر از RTL browser behavior)
+ */
+function detectRtlScrollType() {
+  if (typeof document === "undefined") return "reverse";
+
+  const el = document.createElement("div");
+  el.dir = "rtl";
+  el.style.width = "100px";
+  el.style.height = "100px";
+  el.style.overflow = "scroll";
+  el.style.position = "absolute";
+  el.style.top = "-9999px";
+  el.style.left = "-9999px";
+
+  const inner = document.createElement("div");
+  inner.style.width = "200px";
+  inner.style.height = "1px";
+  el.appendChild(inner);
+
+  document.body.appendChild(el);
+
+  if (el.scrollLeft > 0) {
+    document.body.removeChild(el);
+    return "reverse"; // Chrome/Edge
+  }
+
+  el.scrollLeft = 1;
+  if (el.scrollLeft === 0) {
+    document.body.removeChild(el);
+    return "negative"; // Firefox
+  }
+
+  document.body.removeChild(el);
+  return "default"; // Safari
+}
+
+const RTL_SCROLL_TYPE =
+  typeof window !== "undefined" ? detectRtlScrollType() : "reverse";
+
+function getMaxScrollLeft(el) {
+  return Math.max(0, el.scrollWidth - el.clientWidth);
+}
+
+function getNormalizedScrollLeft(el, isRTL) {
+  const max = getMaxScrollLeft(el);
+  if (!isRTL) return el.scrollLeft;
+
+  if (RTL_SCROLL_TYPE === "negative") {
+    // Firefox: rightmost 0, leftmost -max
+    return el.scrollLeft + max;
+  }
+  if (RTL_SCROLL_TYPE === "default") {
+    // Safari: rightmost 0, leftmost max
+    return max - el.scrollLeft;
+  }
+  // Chrome/Edge reverse: leftmost 0, rightmost max
+  return el.scrollLeft;
+}
+
+function toNativeScrollLeft(el, normalizedLeft, isRTL) {
+  const max = getMaxScrollLeft(el);
+  const n = Math.min(max, Math.max(0, normalizedLeft));
+
+  if (!isRTL) return n;
+
+  if (RTL_SCROLL_TYPE === "negative") return n - max;
+  if (RTL_SCROLL_TYPE === "default") return max - n;
+  return n; // reverse
+}
+
+function scrollToNormalized(el, normalizedLeft, isRTL, behavior = "auto") {
+  el.scrollTo({
+    left: toNativeScrollLeft(el, normalizedLeft, isRTL),
+    behavior,
+  });
+}
+
 export default function RelatedProducts({ currentProductId, currentCategory }) {
   const { t, i18n } = useTranslation();
 
@@ -34,7 +114,7 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
     return [...baseProducts, ...baseProducts, ...baseProducts];
   }, [baseProducts]);
 
-  // ✅ اندازه segment
+  // ✅ segment size
   useEffect(() => {
     const calc = () => {
       const item = firstItemRef.current;
@@ -50,7 +130,7 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
     return () => window.removeEventListener("resize", calc);
   }, [baseProducts.length]);
 
-  // ✅ شروع از وسط (با دو RAF برای اطمینان)
+  // ✅ start from middle segment (RTL-safe)
   useEffect(() => {
     const el = sliderRef.current;
     if (!el || !baseProducts.length) return;
@@ -61,15 +141,13 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
     el.classList.remove("scroll-smooth");
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        el.scrollLeft = seg;
-        requestAnimationFrame(() => {
-          el.classList.add("scroll-smooth");
-        });
+        scrollToNormalized(el, seg, isRTL, "auto");
+        requestAnimationFrame(() => el.classList.add("scroll-smooth"));
       });
     });
-  }, [baseProducts.length]);
+  }, [baseProducts.length, isRTL]);
 
-  // ✅ infinite loop (همیشه LTR)
+  // ✅ infinite loop (RTL-safe)
   const onScroll = () => {
     const el = sliderRef.current;
     if (!el) return;
@@ -81,18 +159,20 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
       if (!seg) return;
       if (lockJumpRef.current) return;
 
-      if (el.scrollLeft < seg * 0.5) {
+      const norm = getNormalizedScrollLeft(el, isRTL);
+
+      if (norm < seg * 0.5) {
         lockJumpRef.current = true;
         el.classList.remove("scroll-smooth");
-        el.scrollLeft += seg;
+        scrollToNormalized(el, norm + seg, isRTL, "auto");
         requestAnimationFrame(() => {
           el.classList.add("scroll-smooth");
           lockJumpRef.current = false;
         });
-      } else if (el.scrollLeft > seg * 2.5) {
+      } else if (norm > seg * 2.5) {
         lockJumpRef.current = true;
         el.classList.remove("scroll-smooth");
-        el.scrollLeft -= seg;
+        scrollToNormalized(el, norm - seg, isRTL, "auto");
         requestAnimationFrame(() => {
           el.classList.add("scroll-smooth");
           lockJumpRef.current = false;
@@ -101,7 +181,7 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
     });
   };
 
-  // ✅ اسکرول گروهی (LTR واقعی)
+  // ✅ group scroll (RTL-safe)
   const scrollByGroup = (dir = 1) => {
     const el = sliderRef.current;
     const item = firstItemRef.current;
@@ -111,13 +191,10 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
     const cardWidth = item.offsetWidth + gap;
     const step = window.innerWidth < 768 ? 2 : 4;
 
-    // چون در RTL ظاهر mirror شده، برای حس درست باید جهت برعکس بشه
-    const direction = isRTL ? -dir : dir;
+    const norm = getNormalizedScrollLeft(el, isRTL);
+    const target = norm + dir * cardWidth * step;
 
-    el.scrollBy({
-      left: direction * cardWidth * step,
-      behavior: "smooth",
-    });
+    scrollToNormalized(el, target, isRTL, "smooth");
   };
 
   // ✅ autoplay
@@ -133,14 +210,14 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isRTL]);
 
-  // ✅ Drag (LTR scroll, ولی RTL حس دست درست)
+  // ✅ Drag (RTL-safe like your other component)
   useEffect(() => {
     const el = sliderRef.current;
     if (!el) return;
 
     let isDown = false;
     let startX = 0;
-    let startLeft = 0;
+    let startNorm = 0;
     let moved = false;
     const THRESHOLD = 6;
 
@@ -150,7 +227,8 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
       isDown = true;
       moved = false;
       startX = e.clientX;
-      startLeft = el.scrollLeft;
+      startNorm = getNormalizedScrollLeft(el, isRTL);
+
       el.style.cursor = "grabbing";
       el.setPointerCapture?.(e.pointerId);
     };
@@ -158,13 +236,15 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
     const onMove = (e) => {
       if (!isDown) return;
 
-      const dx = e.clientX - startX;
-      if (!moved && Math.abs(dx) > THRESHOLD) moved = true;
+      const dxRaw = e.clientX - startX;
+      const dx = isRTL ? -dxRaw : dxRaw;
+
+      if (!moved && Math.abs(dxRaw) > THRESHOLD) moved = true;
       if (!moved) return;
 
-      // LTR: startLeft - dx
-      // RTL (mirror): startLeft + dx
-      el.scrollLeft = isRTL ? startLeft + dx : startLeft - dx;
+      const nextNorm = startNorm - dx;
+      el.scrollLeft = toNativeScrollLeft(el, nextNorm, isRTL);
+
       e.preventDefault();
     };
 
@@ -191,7 +271,7 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
 
   if (!baseProducts.length) return null;
 
-  // ✅ آیکون‌ها در RTL برعکس
+  // ✅ icons swapped in RTL
   const prevIcon = "/arrow-circle-left.svg";
   const nextIcon = "/arrow-circle-left3.svg";
   const leftIcon = isRTL ? nextIcon : prevIcon;
@@ -200,7 +280,9 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
   return (
     <section className="w-full px-4 mt-6 mb-24 overflow-x-hidden">
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-lg md:text-xl font-semibold">{t("single.related")}</h3>
+        <h3 className="text-lg md:text-xl font-semibold">
+          {t("single.related")}
+        </h3>
 
         <div className="flex gap-2 shrink-0">
           <button
@@ -221,28 +303,26 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
         </div>
       </div>
 
-      {/* ✅ کلیدی‌ترین بخش: اسکرولر LTR، ولی در RTL mirror میشه */}
+      {/* ✅ now use real dir (no mirroring hacks) */}
       <div
         ref={sliderRef}
-        dir="ltr"
+        dir={isRTL ? "rtl" : "ltr"}
         onScroll={onScroll}
-        className={`
+        className="
           flex gap-6 overflow-x-auto no-scrollbar
           scroll-smooth snap-x snap-mandatory
           select-none cursor-grab active:cursor-grabbing
-          ${isRTL ? "-scale-x-100" : ""}
-        `}
+        "
       >
         {loopProducts.map((product, index) => (
           <div
             key={`${product?.id ?? "p"}-${index}`}
             ref={index === 0 ? firstItemRef : null}
-            className={`
+            className="
               shrink-0 snap-start
               w-[calc((100%-24px)/2)]
               md:w-[calc((100%-120px)/5)]
-              ${isRTL ? "-scale-x-100" : ""}
-            `}
+            "
           >
             <ProductCard {...product} />
           </div>

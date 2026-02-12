@@ -362,22 +362,31 @@ export default function DiscountSection() {
 
           <div className="md:flex gap-2 hidden">
             <button
-              onClick={() => scrollByGroup(isRTL ? 1 : -1)}
-              className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 grid place-items-center border border-[#ffffff81]"
-              type="button"
-              aria-label="prev"
-            >
-              <ChevronLeft className="text-white" size={22} />
-            </button>
+  onClick={() => scrollByGroup(isRTL ? 1 : -1)}
+  className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 grid place-items-center border border-[#ffffff81]"
+  type="button"
+  aria-label="prev"
+>
+  {isRTL ? (
+    <ChevronRight className="text-white" size={22} />
+  ) : (
+    <ChevronLeft className="text-white" size={22} />
+  )}
+</button>
 
-            <button
-              onClick={() => scrollByGroup(isRTL ? -1 : 1)}
-              className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 grid place-items-center border border-[#ffffff81]"
-              type="button"
-              aria-label="next"
-            >
-              <ChevronRight className="text-white" size={22} />
-            </button>
+<button
+  onClick={() => scrollByGroup(isRTL ? -1 : 1)}
+  className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 grid place-items-center border border-[#ffffff81]"
+  type="button"
+  aria-label="next"
+>
+  {isRTL ? (
+    <ChevronLeft className="text-white" size={22} />
+  ) : (
+    <ChevronRight className="text-white" size={22} />
+  )}
+</button>
+
           </div>
         </div>
 
