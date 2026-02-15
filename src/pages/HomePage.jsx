@@ -10,8 +10,23 @@ import Footer from "../components/layout/Footer"
 import DiscountSection from "../components/sections/home/DiscountSection"
 import ProductCarousel from "../components/common/ProductCarousel"
 import { products } from "../data/products"
+import { api } from "../api/client"; // مسیرش رو درست کن
+import { useEffect, useState } from "react";
 
 function HomePage() {
+
+
+   const [items, setItems] = useState([]);
+  const [err, setErr] = useState("");
+
+  useEffect(() => {
+    api("/products")
+      .then((res) => {
+        // اگر خروجی‌ات {items:[]} بود اینو تغییر بده
+        setItems(res.items || res);
+      })
+      .catch((e) => setErr(e.message));
+  }, []);
 
 
 
