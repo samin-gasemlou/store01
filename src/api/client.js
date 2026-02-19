@@ -1,26 +1,22 @@
-const BASE = import.meta.env.VITE_API_BASE_URL;
+// src/api/client.js
+import axios from "axios";
 
-export function getToken() {
-  return localStorage.getItem("accessToken");
-}
+const client = axios.create({
+  baseURL: "http://localhost:4000/api/v1",
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
-export async function api(path, { method = "GET", body, auth = false } = {}) {
-  const headers = { "Content-Type": "application/json" };
+client.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("shop_access_token");
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
-  if (auth) {
-    const token = getToken();
-    if (token) headers.Authorization = `Bearer ${token}`;
-  }
-
-  const res = await fetch(`${BASE}${path}`, {
-    method,
-    headers,
-    body: body ? JSON.stringify(body) : undefined,
-  });
-
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    throw new Error(data?.message || `HTTP ${res.status}`);
-  }
-  return data;
-}
+// ✅ هم default داشته باش هم named export
+export const api = client;
+export default client;

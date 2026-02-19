@@ -1,16 +1,37 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { categories } from "../../data/categories";
 import { useTranslation } from "react-i18next";
+import { shopGetNavCategories } from "../../services/shopCategoriesApi";
 
 export default function ProductsDropdown() {
   const [open, setOpen] = useState(false);
+  const [cats, setCats] = useState([]); // ✅ از بک
   const { t, i18n } = useTranslation();
 
   const close = () => setOpen(false);
 
   const lang = (i18n.language || "en").split("-")[0];
   const isRTL = lang === "ar" || lang === "ku";
+
+  useEffect(() => {
+    let alive = true;
+
+    async function run() {
+      try {
+        const data = await shopGetNavCategories({ lang });
+        if (!alive) return;
+        setCats(Array.isArray(data) ? data : []);
+      } catch {
+        if (!alive) return;
+        setCats([]);
+      }
+    }
+
+    run();
+    return () => {
+      alive = false;
+    };
+  }, [lang]);
 
   return (
     <div className="relative cursor-pointer">
@@ -33,9 +54,8 @@ export default function ProductsDropdown() {
           }
         `}
       >
-        {categories.map((cat) => (
+        {cats.map((cat) => (
           <div key={cat.slug} className="px-4">
-            {/* Category */}
             <Link
               to={`/store/${cat.slug}`}
               className="block py-2 font-medium"
@@ -44,7 +64,6 @@ export default function ProductsDropdown() {
               {t(`categories.${cat.slug}`, { defaultValue: cat.title })}
             </Link>
 
-            {/* Sub Categories */}
             {cat.children?.map((sub) => (
               <Link
                 key={sub.slug}

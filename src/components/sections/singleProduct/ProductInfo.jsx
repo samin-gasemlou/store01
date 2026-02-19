@@ -2,26 +2,70 @@ import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
+function pickByLang(product, lang) {
+  // title
+  const title =
+    product?.title ??
+    product?.name_fa ??
+    product?.name_en ??
+    product?.name ??
+    "";
+
+  // descriptions (based on your backend fields)
+  const desc_en = product?.description_en ?? "";
+  const desc_ar = product?.description_ar ?? "";
+  const desc_ku = product?.description_kur ?? product?.description_ku ?? "";
+
+  let description = "";
+  if (lang === "en") description = desc_en || desc_ar || desc_ku || product?.description || "";
+  else if (lang === "ar") description = desc_ar || desc_en || desc_ku || product?.description || "";
+  else if (lang === "ku") description = desc_ku || desc_ar || desc_en || product?.description || "";
+  else description = desc_en || desc_ar || desc_ku || product?.description || "";
+
+  // price
+  const priceNumber =
+    Number(product?.price ?? product?.salePrice ?? product?.finalPrice ?? 0) || 0;
+
+  return { title, description, priceNumber };
+}
+
 export default function ProductInfo({ product }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
 
   const [size, setSize] = useState("90 ml");
   const [qty, setQty] = useState(1);
 
-  const productId = String(product?.id ?? "");
+  const lang = (i18n.language || "en").split("-")[0];
 
-  // ✅ ترجمه‌ی فیلدهای محصول (fallback به دیتای اصلی)
+  // ✅ برای سازگاری با کد قبلی (اگر جایی product.id بود)
+  const productId = String(product?._id ?? product?.id ?? "");
+
+  // ✅ ترجمه فقط اگر کلید واقعاً وجود داشت، وگرنه از دیتای بک
   const tr = useMemo(() => {
-    return {
-      title: t(`products.${productId}.title`, product?.title),
-      description: t(`products.${productId}.description`, product?.description),
-      price: t(`products.${productId}.price`, product?.price),
-    };
-  }, [t, productId, product]);
+    const { title, description, priceNumber } = pickByLang(product, lang);
 
-  const numericPrice =
-    Number(String(tr.price ?? 0).replace(/[^0-9.-]+/g, "")) || 0;
+    const keyTitle = `products.${productId}.title`;
+    const keyDesc = `products.${productId}.description`;
+    const keyPrice = `products.${productId}.price`;
+
+    const titleMaybe = t(keyTitle, { defaultValue: "" });
+    const descMaybe = t(keyDesc, { defaultValue: "" });
+    const priceMaybe = t(keyPrice, { defaultValue: "" });
+
+    return {
+      title: titleMaybe && titleMaybe !== keyTitle ? titleMaybe : title,
+      description: descMaybe && descMaybe !== keyDesc ? descMaybe : description,
+      // قیمت ترجمه‌ای نداریم برای آیتم‌های بک؛ پس عدد واقعی رو نمایش می‌دیم
+      price:
+        priceMaybe && priceMaybe !== keyPrice
+          ? priceMaybe
+          : `${priceNumber.toLocaleString()} Toman`,
+      _priceNumber: priceNumber, // داخلی برای سبد خرید
+    };
+  }, [t, productId, product, lang]);
+
+  const numericPrice = tr._priceNumber || 0;
 
   const addToCart = () => {
     let cart = [];
@@ -31,14 +75,21 @@ export default function ProductInfo({ product }) {
       cart = [];
     }
 
-    const existing = cart.find((item) => String(item.id) === String(product.id));
+    const pid = String(product?._id ?? product?.id ?? "");
+    const existing = cart.find((item) => String(item.id) === pid);
+
+    const img =
+      product?.img ??
+      product?.mainImage ??
+      (Array.isArray(product?.images) ? product.images[0] : "") ??
+      "";
 
     if (existing) existing.qty += qty;
     else {
       cart.push({
-        id: product.id,
-        title: tr.title, // ✅ ترجمه‌شده
-        img: product.img,
+        id: pid,
+        title: tr.title,
+        img,
         price: numericPrice,
         qty,
       });
@@ -48,7 +99,6 @@ export default function ProductInfo({ product }) {
     window.dispatchEvent(new Event("cartUpdated"));
   };
 
-  // ✅ BUY NOW: اول اضافه به سبد، بعد برو checkout
   const buyNow = () => {
     addToCart();
     navigate("/checkout");
@@ -78,12 +128,12 @@ export default function ProductInfo({ product }) {
         </div>
 
         <span className="text-gray-500 text-[12px] sm:text-[13px] md:text-sm">
-          {t("single.reviews", { count: product.reviewsCount || 13 })}
+          {t("single.reviews", { count: product?.reviewsCount || 13 })}
         </span>
       </div>
 
       <p className="text-gray-500 text-[12px] sm:text-[13px] md:text-sm">
-        {t("single.productCode")}: {product.code}
+        {t("single.productCode")}: {product?.code || product?.sku || "-"}
       </p>
 
       <div
@@ -114,7 +164,7 @@ export default function ProductInfo({ product }) {
               w-[110px] sm:w-[130px]
               border border-[#1C1E1F]
               rounded-xl
-              px-2 
+              px-2
               select-none
             "
           >

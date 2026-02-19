@@ -1,15 +1,35 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
+const API_BASE =
+  import.meta.env?.VITE_API_BASE_URL?.replace(/\/+$/, "") ||
+  "http://localhost:4000/api/v1";
+
+const API_ORIGIN = (() => {
+  try {
+    return new URL(API_BASE).origin;
+  } catch {
+    return "http://localhost:4000";
+  }
+})();
+
+function fixImageUrl(src) {
+  const s = (src ?? "").toString().trim();
+  if (!s) return "";
+  if (s.startsWith("http://") || s.startsWith("https://")) return s;
+  if (s.startsWith("/uploads/")) return `${API_ORIGIN}${s}`; // ✅ مهم
+  return s;
+}
+
 export default function ProductCard({ id, title, img, price }) {
   const safeId = id ?? "";
   const safeTitle = title ?? "";
-  const safeImg = img ?? "";
+  const safeImg = fixImageUrl(img);
   const safePriceRaw = price ?? 0;
 
   const [liked, setLiked] = useState(() => {
     const wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
-    return wishlist.some((item) => item.id === safeId);
+    return wishlist.some((item) => String(item.id) === String(safeId));
   });
 
   const navigate = useNavigate();
@@ -24,7 +44,7 @@ export default function ProductCard({ id, title, img, price }) {
     let wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
 
     if (liked) {
-      wishlist = wishlist.filter((item) => item.id !== safeId);
+      wishlist = wishlist.filter((item) => String(item.id) !== String(safeId));
     } else {
       wishlist.push({
         id: safeId,
@@ -44,7 +64,7 @@ export default function ProductCard({ id, title, img, price }) {
     e.stopPropagation();
 
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
-    const existing = cart.find((item) => item.id === safeId);
+    const existing = cart.find((item) => String(item.id) === String(safeId));
 
     if (existing) existing.qty += 1;
     else
@@ -77,7 +97,6 @@ export default function ProductCard({ id, title, img, price }) {
           flex flex-col items-center justify-center
         "
       >
-        {/* ❤️ Heart */}
         <button
           onClick={toggleWishlist}
           type="button"
@@ -101,7 +120,6 @@ export default function ProductCard({ id, title, img, price }) {
           />
         </button>
 
-        {/* 🖼️ Image area: flexible + حرفه‌ای */}
         <div className="flex-1 flex items-center justify-center pt-6 sm:pt-7 md:pt-8">
           {safeImg ? (
             <img
@@ -121,22 +139,20 @@ export default function ProductCard({ id, title, img, price }) {
           ) : null}
         </div>
 
-        {/* 🏷️ Title: کنترل طول + 2 خط */}
-       <p
-  className="
-    mt-2 sm:mt-3
-    w-full
-    text-center font-bold
-    text-[12px] sm:text-[14px] md:text-[15px] lg:text-[16px]
-    leading-5
-    whitespace-nowrap overflow-hidden text-ellipsis
-  "
-  title={safeTitle}
->
-  {safeTitle}
-</p>
+        <p
+          className="
+            mt-2 sm:mt-3
+            w-full
+            text-center font-bold
+            text-[12px] sm:text-[14px] md:text-[15px] lg:text-[16px]
+            leading-5
+            whitespace-nowrap overflow-hidden text-ellipsis
+          "
+          title={safeTitle}
+        >
+          {safeTitle}
+        </p>
 
-        {/* 🧾 Bottom: همیشه پایین، فاصله‌ها اصولی */}
         <div className="mt-3 sm:mt-4 flex items-center justify-between w-full">
           <button
             onClick={addToCart}

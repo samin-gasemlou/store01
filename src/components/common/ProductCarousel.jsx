@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import ProductCard from "./ProductCard";
 import { useTranslation } from "react-i18next";
+import * as productsApi from "../../services/shopProductsApi";
 
 // ✅ detect RTL scroll behavior (chrome/edge/firefox)
 function getRtlScrollType() {
@@ -26,16 +27,84 @@ function getRtlScrollType() {
 
   document.body.removeChild(div);
 
-  // reverse => initial is max (positive)
   if (a > 0) return "reverse";
-  // negative => stays 0 when set to 1 (firefox)
   if (b === 0) return "negative";
-  // default => becomes 1
   return "default";
 }
 
+// ✅ env-aware origin resolver for /uploads
+function getBackendOrigin() {
+  const base =
+    (import.meta.env?.VITE_API_BASE_URL || "").replace(/\/+$/, "") ||
+    window.location.origin;
+
+  try {
+    return new URL(base).origin;
+  } catch {
+    return base;
+  }
+}
+
+function normalizeUploadsUrl(urlLike) {
+  const s = String(urlLike || "");
+  if (!s) return "";
+  if (s.startsWith("http://") || s.startsWith("https://")) return s;
+
+  if (s.startsWith("/uploads/")) {
+    const origin = getBackendOrigin();
+    return `${origin}${s}`;
+  }
+
+  return s;
+}
+
+function mapProductToCard(p, lang) {
+  const id = p?._id ?? p?.id ?? "";
+
+  // عنوان بر اساس زبان
+  const l = (lang || "en").split("-")[0];
+  const title =
+    p?.title ??
+    (l === "ar"
+      ? p?.name_ar
+      : l === "ku"
+      ? p?.name_kur || p?.name_ku
+      : p?.name_en) ??
+    p?.name_en ??
+    p?.name_ar ??
+    p?.name_kur ??
+    p?.name_ku ??
+    p?.name ??
+    "";
+
+  const imgRaw =
+    p?.img ??
+    p?.mainImage ??
+    p?.image ??
+    p?.thumbnail ??
+    (Array.isArray(p?.images) ? p.images[0] : "") ??
+    (Array.isArray(p?.gallery) ? p.gallery[0] : "") ??
+    "";
+
+  const img = normalizeUploadsUrl(imgRaw);
+
+  const price = p?.price ?? p?.salePrice ?? p?.finalPrice ?? p?.amount ?? 0;
+
+  const category = p?.category ?? p?.categoryName ?? p?.category_name ?? "";
+  const subCategory =
+    p?.subCategory ?? p?.subCategoryName ?? p?.subcategory ?? "";
+
+  return {
+    id: String(id),
+    title,
+    img,
+    price,
+    category,
+    subCategory,
+  };
+}
+
 export default function MenCollection({
-  items = [],
   baseCount = 5,
   mobileStep = 2,
   desktopStep = 5,
@@ -50,10 +119,8 @@ export default function MenCollection({
   const isRTL = lang === "ar" || lang === "ku";
   const rtlTypeRef = useRef(getRtlScrollType());
 
-  // ✅ When drag happened, block the next click (so Links don't misfire)
   const blockClickRef = useRef(false);
 
-  // ✅ normalized axis helpers
   const getX = () => {
     const el = sliderRef.current;
     if (!el) return 0;
@@ -62,9 +129,9 @@ export default function MenCollection({
     const max = el.scrollWidth - el.clientWidth;
     const type = rtlTypeRef.current;
 
-    if (type === "negative") return -el.scrollLeft; // firefox
-    if (type === "reverse") return max - el.scrollLeft; // chrome/edge
-    return el.scrollLeft; // safari default-ish
+    if (type === "negative") return -el.scrollLeft;
+    if (type === "reverse") return max - el.scrollLeft;
+    return el.scrollLeft;
   };
 
   const setX = (x) => {
@@ -104,11 +171,59 @@ export default function MenCollection({
     el.scrollTo({ left: raw, behavior });
   };
 
+  const [apiItems, setApiItems] = useState([]);
+  const [apiLoaded, setApiLoaded] = useState(false);
+
+  // ✅ همیشه از بک بخون (حتی اگر items پاس داده شده باشد)
+  useEffect(() => {
+    let alive = true;
+
+    async function run() {
+      try {
+        const out = await productsApi.shopListProducts({
+          page: 1,
+          limit: 500,
+          fields:
+            "_id,name_en,name_ar,name_ku,name_kur,name,title,price,mainImage,image,thumbnail,category,categoryName,subCategory,subCategoryName",
+        });
+
+        const raw =
+          (Array.isArray(out) ? out : null) ||
+          (Array.isArray(out?.items) ? out.items : null) ||
+          (Array.isArray(out?.data) ? out.data : null) ||
+          (Array.isArray(out?.products) ? out.products : null) ||
+          [];
+
+        const mapped = (raw || [])
+          .map((p) => mapProductToCard(p, i18n.language))
+          .filter((x) => x?.id && /^[a-fA-F0-9]{24}$/.test(String(x.id))); // ✅ فقط ObjectId واقعی
+
+        if (!alive) return;
+        setApiItems(mapped);
+      } catch {
+        if (!alive) return;
+        setApiItems([]);
+      } finally {
+        if (alive) setApiLoaded(true);
+      }
+    }
+
+    run();
+    return () => {
+      alive = false;
+    };
+  }, [i18n.language]);
+
+  // ✅ منبع فقط دیتابیس
+  const sourceItems = useMemo(() => {
+    return apiItems;
+  }, [apiItems]);
+
   const baseItems = useMemo(() => {
-    const arr = Array.isArray(items) ? items.filter(Boolean) : [];
+    const arr = Array.isArray(sourceItems) ? sourceItems.filter(Boolean) : [];
     const sliced = arr.slice(0, baseCount);
     return sliced.length ? sliced : [];
-  }, [items, baseCount]);
+  }, [sourceItems, baseCount]);
 
   const loopItems = useMemo(() => {
     if (!baseItems.length) return [];
@@ -122,7 +237,7 @@ export default function MenCollection({
   useEffect(() => {
     const calc = () => {
       if (!firstItemRef.current) return;
-      const cardWidth = firstItemRef.current.offsetWidth + 20; // gap-5 => 20px
+      const cardWidth = firstItemRef.current.offsetWidth + 20;
       setCardStep(cardWidth);
       segmentWidthRef.current = cardWidth * baseItems.length;
     };
@@ -132,7 +247,6 @@ export default function MenCollection({
     return () => window.removeEventListener("resize", calc);
   }, [baseItems.length]);
 
-  // ✅ start from middle
   useEffect(() => {
     const el = sliderRef.current;
     if (!el || !baseItems.length) return;
@@ -147,7 +261,6 @@ export default function MenCollection({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [baseItems.length, isRTL]);
 
-  // ✅ infinite loop
   const onScroll = () => {
     const el = sliderRef.current;
     if (!el || !baseItems.length) return;
@@ -172,7 +285,6 @@ export default function MenCollection({
     scrollByX(direction * cardStep * step, "smooth");
   };
 
-  // ✅ Drag (RTL-safe) — FIXED so clicking cards still works
   useEffect(() => {
     const el = sliderRef.current;
     if (!el) return;
@@ -186,7 +298,6 @@ export default function MenCollection({
     const THRESHOLD = 6;
 
     const onDown = (e) => {
-      // ✅ اگر روی لینک/دکمه کلیک شد، درگ رو شروع نکن
       if (e.target.closest("a,button,input,textarea,select,label")) return;
 
       isDown = true;
@@ -202,16 +313,15 @@ export default function MenCollection({
 
       const dx = e.clientX - startClientX;
 
-      // ✅ تا وقتی threshold رد نشده، چیزی تغییر نده (کلیک خراب نشه)
       if (!moved && Math.abs(dx) < THRESHOLD) return;
 
-      // ✅ اینجا یعنی drag واقعی شروع شده
       if (!moved) {
         moved = true;
-        // ✅ فقط وقتی drag شروع شد capture کن (وگرنه کلیک Link می‌میره)
         try {
           el.setPointerCapture?.(pid);
-        } catch { /* empty */ }
+        } catch {
+          /* empty */
+        }
       }
 
       setX(startAxis - dx);
@@ -222,7 +332,6 @@ export default function MenCollection({
       if (!isDown) return;
       isDown = false;
 
-      // ✅ اگر drag انجام شد، کلیک بعدی رو بلاک کن تا کارت ناخواسته باز نشه/یا برعکس کلیک خراب نشه
       if (moved) {
         blockClickRef.current = true;
         window.setTimeout(() => {
@@ -250,6 +359,8 @@ export default function MenCollection({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isRTL]);
 
+  if (!baseItems.length && !apiLoaded) return null;
+
   return (
     <section className="w-full relative overflow-x-hidden md:mb-20">
       <div className="w-full mx-auto px-2">
@@ -268,7 +379,6 @@ export default function MenCollection({
               ref={sliderRef}
               onScroll={onScroll}
               onClickCapture={(e) => {
-                // ✅ اگر همین الان drag انجام شده، کلیک رو بلاک کن
                 if (blockClickRef.current) {
                   e.preventDefault();
                   e.stopPropagation();

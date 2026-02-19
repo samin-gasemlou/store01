@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import ProductCard from "../../common/ProductCard";
-import { products } from "../../../data/products";
 import { useTranslation } from "react-i18next";
+import * as productsApi from "../../../services/shopProductsApi";
 
 function getRtlScrollType() {
   if (typeof document === "undefined") return "default";
@@ -31,8 +31,78 @@ function getRtlScrollType() {
   return "default";
 }
 
+// ✅ env-aware origin resolver for /uploads
+function getBackendOrigin() {
+  const base =
+    (import.meta.env?.VITE_API_BASE_URL || "").replace(/\/+$/, "") ||
+    window.location.origin;
+
+  try {
+    return new URL(base).origin;
+  } catch {
+    return base;
+  }
+}
+
+function normalizeUploadsUrl(urlLike) {
+  const s = String(urlLike || "");
+  if (!s) return "";
+  if (s.startsWith("http://") || s.startsWith("https://")) return s;
+
+  if (s.startsWith("/uploads/")) {
+    const origin = getBackendOrigin();
+    return `${origin}${s}`;
+  }
+
+  return s;
+}
+
+function mapProductToCard(p, lang) {
+  const id = p?._id ?? p?.id ?? "";
+
+  const l = (lang || "en").split("-")[0];
+  const title =
+    p?.title ??
+    (l === "ar"
+      ? p?.name_ar
+      : l === "ku"
+      ? p?.name_kur || p?.name_ku
+      : p?.name_en) ??
+    p?.name_en ??
+    p?.name_ar ??
+    p?.name_kur ??
+    p?.name_ku ??
+    p?.name ??
+    "";
+
+  const imgRaw =
+    p?.img ??
+    p?.mainImage ??
+    p?.image ??
+    p?.thumbnail ??
+    (Array.isArray(p?.images) ? p.images[0] : "") ??
+    (Array.isArray(p?.gallery) ? p.gallery[0] : "") ??
+    "";
+
+  const img = normalizeUploadsUrl(imgRaw);
+
+  const price = p?.price ?? p?.salePrice ?? p?.finalPrice ?? p?.amount ?? 0;
+
+  const category = p?.category ?? p?.categoryName ?? p?.category_name ?? "";
+  const subCategory =
+    p?.subCategory ?? p?.subCategoryName ?? p?.subcategory ?? "";
+
+  return {
+    id: String(id),
+    title,
+    img,
+    price,
+    category,
+    subCategory,
+  };
+}
+
 export default function Recommend({
-  items = products,
   baseCount = 5,
   mobileStep = 2,
   desktopStep = 4,
@@ -94,10 +164,53 @@ export default function Recommend({
     }
   };
 
+  const [apiItems, setApiItems] = useState([]);
+  const [apiLoaded, setApiLoaded] = useState(false);
+
+  // ✅ همیشه از بک بخون (لوکال حذف)
+  useEffect(() => {
+    let alive = true;
+
+    async function run() {
+      try {
+        const out = await productsApi.shopListProducts({
+          page: 1,
+          limit: 500,
+          fields:
+            "_id,name_en,name_ar,name_ku,name_kur,name,title,price,mainImage,image,thumbnail,category,categoryName,subCategory,subCategoryName",
+        });
+
+        const raw =
+          (Array.isArray(out) ? out : null) ||
+          (Array.isArray(out?.items) ? out.items : null) ||
+          (Array.isArray(out?.data) ? out.data : null) ||
+          (Array.isArray(out?.products) ? out.products : null) ||
+          [];
+
+        const mapped = (raw || [])
+          .map((p) => mapProductToCard(p, i18n.language))
+          .filter((x) => x?.id && /^[a-fA-F0-9]{24}$/.test(String(x.id)));
+
+        if (!alive) return;
+        setApiItems(mapped);
+      } catch {
+        if (!alive) return;
+        setApiItems([]);
+      } finally {
+        if (alive) setApiLoaded(true);
+      }
+    }
+
+    run();
+    return () => {
+      alive = false;
+    };
+  }, [i18n.language]);
+
   const baseItems = useMemo(() => {
-    const arr = Array.isArray(items) ? items.filter(Boolean) : [];
+    const arr = Array.isArray(apiItems) ? apiItems.filter(Boolean) : [];
     return arr.slice(0, baseCount);
-  }, [items, baseCount]);
+  }, [apiItems, baseCount]);
 
   const loopItems = useMemo(() => {
     if (!baseItems.length) return [];
@@ -211,6 +324,8 @@ export default function Recommend({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isRTL]);
 
+  if (!baseItems.length && !apiLoaded) return null;
+
   return (
     <section className="w-full relative overflow-x-hidden md:mb-20">
       <div className="w-full mx-auto px-2">
@@ -271,6 +386,7 @@ function Header({ title, onLeft, onRight, isRTL }) {
     </div>
   );
 }
+
 function ImageBlock({ imageSrc }) {
   return (
     <div className="hidden md:flex shrink-0">

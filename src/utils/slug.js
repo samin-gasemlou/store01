@@ -1,7 +1,18 @@
-export const toSlug = (text) =>
-  text.toLowerCase().replace(/ /g, "-").replace(/'/g, "");
+// src/utils/slug.js
+export function toSlug(value) {
+  const s = (value ?? "").toString().trim();
+  if (!s) return "";
+  return s
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w-]+/g, "")
+    .replace(/--+/g, "-")
+    .replace(/^-+/, "")
+    .replace(/-+$/, "");
+}
 
-export const fromSlug = (slug) =>
-  slug
-    .replace(/-/g, " ")
-    .replace(/\b\w/g, (l) => l.toUpperCase());
+export function fromSlug(value) {
+  const s = (value ?? "").toString().trim();
+  if (!s) return "";
+  return s.replace(/-/g, " ");
+}

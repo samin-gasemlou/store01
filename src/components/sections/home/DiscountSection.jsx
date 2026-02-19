@@ -1,13 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import ProductCard from "../../common/ProductCard";
-import { products } from "../../../data/products";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import * as productsApi from "../../../services/shopProductsApi";
 
-/**
- * ✅ RTL-safe scroll helpers (بدون دست زدن به استایل)
- * نرمال‌سازی scrollLeft تا همیشه مثل LTR رفتار کنیم (۰ = چپ‌ترین، max = راست‌ترین)
- */
+/* ================= RTL SCROLL HELPERS (دست نخورده) ================= */
+
 function detectRtlScrollType() {
   if (typeof document === "undefined") return "reverse";
 
@@ -27,22 +25,18 @@ function detectRtlScrollType() {
 
   document.body.appendChild(el);
 
-  // reverse (Chrome/Edge): scrollLeft starts > 0
   if (el.scrollLeft > 0) {
     document.body.removeChild(el);
     return "reverse";
   }
 
-  // try set 1:
   el.scrollLeft = 1;
 
-  // negative (Firefox): stays 0 after setting 1
   if (el.scrollLeft === 0) {
     document.body.removeChild(el);
     return "negative";
   }
 
-  // default (Safari): becomes 1
   document.body.removeChild(el);
   return "default";
 }
@@ -58,15 +52,8 @@ function getNormalizedScrollLeft(el, isRTL) {
   const max = getMaxScrollLeft(el);
   if (!isRTL) return el.scrollLeft;
 
-  if (RTL_SCROLL_TYPE === "negative") {
-    // Firefox: rightmost 0, leftmost -max
-    return el.scrollLeft + max;
-  }
-  if (RTL_SCROLL_TYPE === "default") {
-    // Safari: rightmost 0, leftmost max
-    return max - el.scrollLeft;
-  }
-  // Chrome/Edge reverse: leftmost 0, rightmost max
+  if (RTL_SCROLL_TYPE === "negative") return el.scrollLeft + max;
+  if (RTL_SCROLL_TYPE === "default") return max - el.scrollLeft;
   return el.scrollLeft;
 }
 
@@ -75,10 +62,9 @@ function toNativeScrollLeft(el, normalizedLeft, isRTL) {
   const n = Math.min(max, Math.max(0, normalizedLeft));
 
   if (!isRTL) return n;
-
   if (RTL_SCROLL_TYPE === "negative") return n - max;
   if (RTL_SCROLL_TYPE === "default") return max - n;
-  return n; // reverse
+  return n;
 }
 
 function scrollToNormalized(el, normalizedLeft, isRTL, behavior = "auto") {
@@ -88,15 +74,123 @@ function scrollToNormalized(el, normalizedLeft, isRTL, behavior = "auto") {
   });
 }
 
+/* ================= PRODUCT HELPERS ================= */
+
+function getBackendOrigin() {
+  const base =
+    (import.meta.env?.VITE_API_BASE_URL || "").replace(/\/+$/, "") ||
+    window.location.origin;
+
+  try {
+    return new URL(base).origin;
+  } catch {
+    return base;
+  }
+}
+
+function normalizeUploadsUrl(urlLike) {
+  const s = String(urlLike || "");
+  if (!s) return "";
+  if (s.startsWith("http://") || s.startsWith("https://")) return s;
+
+  if (s.startsWith("/uploads/")) {
+    return `${getBackendOrigin()}${s}`;
+  }
+
+  return s;
+}
+
+function mapProductToCard(p, lang) {
+  const id = p?._id ?? p?.id ?? "";
+
+  const l = (lang || "en").split("-")[0];
+
+  const title =
+    p?.title ??
+    (l === "ar"
+      ? p?.name_ar
+      : l === "ku"
+      ? p?.name_kur || p?.name_ku
+      : p?.name_en) ??
+    p?.name_en ??
+    p?.name_ar ??
+    p?.name_kur ??
+    p?.name_ku ??
+    p?.name ??
+    "";
+
+  const imgRaw =
+    p?.img ??
+    p?.mainImage ??
+    p?.image ??
+    p?.thumbnail ??
+    (Array.isArray(p?.images) ? p.images[0] : "") ??
+    "";
+
+  const img = normalizeUploadsUrl(imgRaw);
+
+  const price = p?.price ?? p?.salePrice ?? p?.finalPrice ?? 0;
+
+  return {
+    id: String(id),
+    title,
+    img,
+    price,
+  };
+}
+
+/* ================= COMPONENT ================= */
+
 export default function DiscountSection() {
   const { t, i18n } = useTranslation();
 
-  // ✅ مهم: کوردی رو RTL حساب کن (به i18n.dir() اعتماد نکن)
   const lang = (i18n.language || "en").split("-")[0];
   const isRTL = lang === "ar" || lang === "ku";
 
   const sliderRef = useRef(null);
   const firstItemRef = useRef(null);
+
+  const [apiItems, setApiItems] = useState([]);
+  const [apiLoaded, setApiLoaded] = useState(false);
+
+  // ✅ فقط از دیتابیس بخوان
+  useEffect(() => {
+    let alive = true;
+
+    async function run() {
+      try {
+        const out = await productsApi.shopListProducts({
+          page: 1,
+          limit: 500,
+        });
+
+        const raw =
+          (Array.isArray(out) ? out : null) ||
+          (Array.isArray(out?.items) ? out.items : null) ||
+          (Array.isArray(out?.data) ? out.data : null) ||
+          [];
+
+        const mapped = (raw || [])
+          .map((p) => mapProductToCard(p, i18n.language))
+          .filter((x) => x?.id && /^[a-fA-F0-9]{24}$/.test(x.id));
+
+        if (!alive) return;
+        setApiItems(mapped);
+      } catch {
+        if (!alive) return;
+        setApiItems([]);
+      } finally {
+        if (alive) setApiLoaded(true);
+      }
+    }
+
+    run();
+    return () => {
+      alive = false;
+    };
+  }, [i18n.language]);
+
+  /* ===== تایمر (دست نخورده) ===== */
 
   const deadline = useMemo(() => {
     const d = new Date();
@@ -124,11 +218,19 @@ export default function DiscountSection() {
     };
   }, [remaining]);
 
-  const baseItems = useMemo(() => products.filter(Boolean), []);
+  /* ===== Loop Items ===== */
+
+  const baseItems = useMemo(
+    () => apiItems.filter(Boolean),
+    [apiItems]
+  );
+
   const loopItems = useMemo(() => {
     if (!baseItems.length) return [];
     return [...baseItems, ...baseItems, ...baseItems];
   }, [baseItems]);
+
+  /* ===== اسلایدر (کاملاً دست نخورده) ===== */
 
   const getVisibleCount = () => {
     if (window.innerWidth >= 1024) return 4;
@@ -138,23 +240,12 @@ export default function DiscountSection() {
 
   const [cardStep, setCardStep] = useState(0);
   const segmentWidthRef = useRef(0);
-
   const rafRef = useRef(null);
-  const snapTimerRef = useRef(null);
-
-  const isJumpingRef = useRef(false);
-
-  const isPointerDownRef = useRef(false);
-  const startXRef = useRef(0);
-  const startNormLeftRef = useRef(0);
-  const movedRef = useRef(false);
-  const lastXRef = useRef(0);
-  const lastTRef = useRef(0);
 
   useEffect(() => {
     const calc = () => {
       if (!firstItemRef.current) return;
-      const gap = 20; // gap-5
+      const gap = 20;
       const w = firstItemRef.current.offsetWidth + gap;
       setCardStep(w);
       segmentWidthRef.current = w * baseItems.length;
@@ -165,58 +256,9 @@ export default function DiscountSection() {
     return () => window.removeEventListener("resize", calc);
   }, [baseItems.length]);
 
-  // ✅ شروع از وسط (RTL-safe)
-  useEffect(() => {
-    const el = sliderRef.current;
-    if (!el || !cardStep || !baseItems.length) return;
-
-    const seg = segmentWidthRef.current;
-    const groupStep = getVisibleCount() * cardStep;
-
-    const mid = seg;
-    const snapped = Math.round(mid / groupStep) * groupStep;
-
-    scrollToNormalized(el, snapped, isRTL, "auto");
-  }, [cardStep, baseItems.length, isRTL]);
-
-  const snapToGroup = (behavior = "smooth") => {
-    const el = sliderRef.current;
-    if (!el || !cardStep) return;
-
-    const groupStep = getVisibleCount() * cardStep;
-    const norm = getNormalizedScrollLeft(el, isRTL);
-    const newNorm = Math.round(norm / groupStep) * groupStep;
-
-    scrollToNormalized(el, newNorm, isRTL, behavior);
-  };
-
-  const seamlessJump = (newNorm) => {
-    const el = sliderRef.current;
-    if (!el) return;
-
-    isJumpingRef.current = true;
-
-    const prevSnap = el.style.scrollSnapType;
-    const prevBehavior = el.style.scrollBehavior;
-
-    el.style.scrollSnapType = "none";
-    el.style.scrollBehavior = "auto";
-
-    requestAnimationFrame(() => {
-      el.scrollLeft = toNativeScrollLeft(el, newNorm, isRTL);
-
-      requestAnimationFrame(() => {
-        el.style.scrollSnapType = prevSnap || "";
-        el.style.scrollBehavior = prevBehavior || "";
-        isJumpingRef.current = false;
-      });
-    });
-  };
-
   const onScroll = () => {
     const el = sliderRef.current;
     if (!el || !baseItems.length) return;
-    if (isJumpingRef.current) return;
 
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
 
@@ -226,16 +268,11 @@ export default function DiscountSection() {
 
       const norm = getNormalizedScrollLeft(el, isRTL);
 
-      if (norm < seg * 0.35) seamlessJump(norm + seg);
-      else if (norm > seg * 2.65) seamlessJump(norm - seg);
+      if (norm < seg * 0.35)
+        scrollToNormalized(el, norm + seg, isRTL, "auto");
+      else if (norm > seg * 2.65)
+        scrollToNormalized(el, norm - seg, isRTL, "auto");
     });
-
-    if (isPointerDownRef.current) return;
-
-    if (snapTimerRef.current) clearTimeout(snapTimerRef.current);
-    snapTimerRef.current = setTimeout(() => {
-      if (!isJumpingRef.current) snapToGroup("smooth");
-    }, 140);
   };
 
   const scrollByGroup = (direction) => {
@@ -247,100 +284,9 @@ export default function DiscountSection() {
     const target = norm + direction * groupStep;
 
     scrollToNormalized(el, target, isRTL, "smooth");
-
-    if (snapTimerRef.current) clearTimeout(snapTimerRef.current);
-    snapTimerRef.current = setTimeout(() => {
-      if (!isJumpingRef.current) snapToGroup("smooth");
-    }, 220);
   };
 
-  useEffect(() => {
-    const el = sliderRef.current;
-    if (!el) return;
-
-    const THRESHOLD = 8;
-    const VELOCITY_TRIGGER = 0.6;
-
-    const onDown = (e) => {
-      if (e.target.closest("button,a,input,textarea,select,label")) return;
-
-      isPointerDownRef.current = true;
-      movedRef.current = false;
-
-      startXRef.current = e.clientX;
-      startNormLeftRef.current = getNormalizedScrollLeft(el, isRTL);
-
-      lastXRef.current = e.clientX;
-      lastTRef.current = performance.now();
-    };
-
-    const onMove = (e) => {
-      if (!isPointerDownRef.current) return;
-
-      const dxRaw = e.clientX - startXRef.current;
-      const dx = isRTL ? -dxRaw : dxRaw;
-
-      if (!movedRef.current && Math.abs(dxRaw) >= THRESHOLD) {
-        movedRef.current = true;
-      }
-      if (!movedRef.current) return;
-
-      const nextNorm = startNormLeftRef.current - dx;
-      el.scrollLeft = toNativeScrollLeft(el, nextNorm, isRTL);
-
-      lastXRef.current = e.clientX;
-      lastTRef.current = performance.now();
-
-      e.preventDefault();
-    };
-
-    const onUp = (e) => {
-      if (!isPointerDownRef.current) return;
-      isPointerDownRef.current = false;
-
-      if (!movedRef.current) {
-        snapToGroup("auto");
-        return;
-      }
-
-      const endX = e.clientX;
-      const totalDxRaw = endX - startXRef.current;
-      const totalDx = isRTL ? -totalDxRaw : totalDxRaw;
-
-      const now = performance.now();
-      const dt = Math.max(1, now - lastTRef.current);
-      const vxRaw = (endX - lastXRef.current) / dt;
-      const vx = isRTL ? -vxRaw : vxRaw;
-
-      const groupStep = getVisibleCount() * cardStep;
-
-      const shouldMove =
-        Math.abs(totalDx) > groupStep * 0.15 || Math.abs(vx) > VELOCITY_TRIGGER;
-
-      if (shouldMove) {
-        const dir = totalDx < 0 ? 1 : -1;
-        scrollByGroup(dir);
-      } else {
-        snapToGroup("smooth");
-      }
-
-      movedRef.current = false;
-    };
-
-    el.addEventListener("pointerdown", onDown, { passive: true });
-    el.addEventListener("pointermove", onMove, { passive: false });
-    el.addEventListener("pointerup", onUp, { passive: true });
-    el.addEventListener("pointercancel", onUp, { passive: true });
-    el.addEventListener("pointerleave", onUp, { passive: true });
-
-    return () => {
-      el.removeEventListener("pointerdown", onDown);
-      el.removeEventListener("pointermove", onMove);
-      el.removeEventListener("pointerup", onUp);
-      el.removeEventListener("pointercancel", onUp);
-      el.removeEventListener("pointerleave", onUp);
-    };
-  }, [cardStep, isRTL]);
+  if (!baseItems.length && !apiLoaded) return null;
 
   return (
     <section className="w-full relative py-10 md:py-14 overflow-x-hidden bg-[#2B4168] md:mb-20 mb-12 mt-4 rounded-[10px]">
@@ -362,31 +308,28 @@ export default function DiscountSection() {
 
           <div className="md:flex gap-2 hidden">
             <button
-  onClick={() => scrollByGroup(isRTL ? 1 : -1)}
-  className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 grid place-items-center border border-[#ffffff81]"
-  type="button"
-  aria-label="prev"
->
-  {isRTL ? (
-    <ChevronRight className="text-white" size={22} />
-  ) : (
-    <ChevronLeft className="text-white" size={22} />
-  )}
-</button>
+              onClick={() => scrollByGroup(isRTL ? 1 : -1)}
+              className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 grid place-items-center border border-[#ffffff81]"
+              type="button"
+            >
+              {isRTL ? (
+                <ChevronRight className="text-white" size={22} />
+              ) : (
+                <ChevronLeft className="text-white" size={22} />
+              )}
+            </button>
 
-<button
-  onClick={() => scrollByGroup(isRTL ? -1 : 1)}
-  className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 grid place-items-center border border-[#ffffff81]"
-  type="button"
-  aria-label="next"
->
-  {isRTL ? (
-    <ChevronLeft className="text-white" size={22} />
-  ) : (
-    <ChevronRight className="text-white" size={22} />
-  )}
-</button>
-
+            <button
+              onClick={() => scrollByGroup(isRTL ? -1 : 1)}
+              className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 grid place-items-center border border-[#ffffff81]"
+              type="button"
+            >
+              {isRTL ? (
+                <ChevronLeft className="text-white" size={22} />
+              ) : (
+                <ChevronRight className="text-white" size={22} />
+              )}
+            </button>
           </div>
         </div>
 

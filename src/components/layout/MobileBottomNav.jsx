@@ -1,10 +1,17 @@
 import { Home, Search, ShoppingCart, User, Menu } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { categories } from "../../data/categories";
-import { products } from "../../data/products";
+import { useEffect, useRef, useState } from "react";
 import CartDropdown from "../ui/CartDropdown";
 import { useTranslation } from "react-i18next";
+import { getShopAccessToken } from "../../services/shopAuthApi";
+
+// ⬇️ جدید: اتصال به بک‌اند
+import {
+  fetchPublicCategories,
+  fetchPublicProducts,
+  pickProductTitle,
+  slugify,
+} from "../../services/shopCatalogApi";
 
 export default function MobileBottomNav() {
   const { t, i18n } = useTranslation();
@@ -17,6 +24,13 @@ export default function MobileBottomNav() {
   const [cartOpen, setCartOpen] = useState(false);
 
   const [q, setQ] = useState("");
+
+  // ✅ کاتگوری‌ها از بک
+  const [categories, setCategories] = useState([]);
+
+  // ✅ پیشنهاد سرچ از بک
+  const [suggestions, setSuggestions] = useState([]);
+
   const [cartItems, setCartItems] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem("cart")) || [];
@@ -31,14 +45,6 @@ export default function MobileBottomNav() {
 
   const isAuthPage =
     location.pathname === "/signin" || location.pathname === "/signup";
-
-  const suggestions = useMemo(() => {
-    const query = q.trim().toLowerCase();
-    if (!query) return [];
-    return products
-      .filter((p) => p.title.toLowerCase().includes(query))
-      .slice(0, 6);
-  }, [q]);
 
   useEffect(() => {
     const readCart = () => {
@@ -99,6 +105,93 @@ export default function MobileBottomNav() {
   const lang = (i18n.language || "en").split("-")[0];
   const isRTL = lang === "ar" || lang === "ku";
 
+  const isLoggedIn = !!getShopAccessToken();
+  const accountHref = isLoggedIn ? "/account" : "/signin";
+
+  // ✅ 1) گرفتن دسته‌بندی‌ها از بک‌اند
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      try {
+        const res = await fetchPublicCategories({ limit: 200 });
+        const data = Array.isArray(res?.data) ? res.data : [];
+
+        // normalize: فرانت دنبال { slug, title } است
+        const normalized = data
+          .map((c) => {
+            const title =
+              (lang === "ar" ? c?.name_ar : lang === "ku" ? (c?.name_kur || c?.name_ku) : c?.name_en) ||
+              c?.name_en ||
+              c?.name_ar ||
+              c?.name_kur ||
+              "";
+
+            const slug = slugify(c?.name_en || title);
+
+            return {
+              slug,
+              title,
+              _raw: c,
+            };
+          })
+          .filter((x) => x.slug && x.title);
+
+        if (mounted) setCategories(normalized);
+      } catch {
+        // اگر fetch شکست خورد، چیزی نمی‌ریزیم (ظاهر تغییر نکنه)
+        if (mounted) setCategories([]);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [lang]);
+
+  // ✅ 2) پیشنهادهای سرچ از بک‌اند (debounce)
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  useEffect(() => {
+    let cancelled = false;
+
+    const query = q.trim();
+    if (!query) {
+      setSuggestions([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        // مطابق بک‌اند: /products?q=...&limit=6
+        // fields برای سبک‌تر شدن پاسخ
+        const res = await fetchPublicProducts({
+          q: query,
+          limit: 6,
+          fields: "_id,name_en,name_ar,name_ku,name_kur,name",
+        });
+
+        const items = Array.isArray(res?.data) ? res.data : [];
+
+        const normalized = items
+          .map((p) => ({
+            id: p?._id,
+            title: pickProductTitle(p, i18n.language),
+          }))
+          .filter((x) => x.id && x.title);
+
+        if (!cancelled) setSuggestions(normalized);
+      } catch {
+        if (!cancelled) setSuggestions([]);
+      }
+    }, 250);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [q, i18n.language]);
+
   return (
     <nav
       className="
@@ -140,7 +233,7 @@ export default function MobileBottomNav() {
                 open={cartOpen}
                 cartItems={cartItems}
                 onClose={() => setCartOpen(false)}
-                align={isRTL ? "right" : "left"}   // ✅ اینجا جهت رو میدیم
+                align={isRTL ? "right" : "left"} // ✅ اینجا جهت رو میدیم
               />
             </div>
 
@@ -196,7 +289,9 @@ export default function MobileBottomNav() {
                           navigate(`/search?q=${encodeURIComponent(q.trim())}`);
                         }}
                         type="button"
-                        className={`block w-full ${isRTL ? "text-right" : "text-left"} text-[13px] px-2 py-2 rounded-lg hover:bg-gray-50`}
+                        className={`block w-full ${
+                          isRTL ? "text-right" : "text-left"
+                        } text-[13px] px-2 py-2 rounded-lg hover:bg-gray-50`}
                       >
                         {p.title}
                       </button>
@@ -218,7 +313,7 @@ export default function MobileBottomNav() {
 
             {/* Account */}
             <Link
-              to="/account"
+              to={accountHref}
               onClick={closeAll}
               className={btnClass(isActive("/account"))}
               aria-label={t("mobileNav.account")}

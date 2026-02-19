@@ -94,38 +94,32 @@
     "next": "Next"
   },
 
-  "checkout": {
-    "yourOrder": "Your Order",
-    "product": "Product",
-    "subtotal": "Subtotal",
-    "total": "Total",
-    "billingDetails": "Billing Details",
-
-    "firstName": "First name *",
-    "lastName": "Last name *",
-    "company": "Company name (optional)",
-    "countryValue": "Iran",
-    "address": "Street address *",
-    "city": "City *",
-    "province": "Province *",
-    "provinceDefault": "Tehran",
-    "postalCode": "Postal code *",
-    "phone": "Phone *",
-    "email": "Email address *",
-    "note": "Order notes (optional)",
-
-    "placeOrder": "Place Order",
-    "alertEmptyCart": "Your cart is empty!",
-    "alertSubmitted": "Order submitted (demo)",
-
-    "shipping": {
-      "chapaar": "Chapaar (Recommended)",
-      "post": "Post",
-      "tipax": "Tipax",
-      "cargo": "Cargo",
-      "bus": "Bus Delivery"
-    }
-  },
+"checkout": {
+  "yourOrder": "Your Order",
+  "billingDetails": "Billing Details",
+  "subtotal": "Subtotal",
+  "total": "Total",
+  "shippingTitle": "Shipping",
+  "freeShipping": "Free Shipping",
+  "paymentNote": "Payment is offline. Orders can be canceled within 2 hours.",
+  "alertEmptyCart": "Your cart is empty!",
+  "alertSubmitted": "Order submitted successfully",
+  "loginRequired": "Please login first",
+  "fullNameRequired": "Full name is required",
+  "mobileRequired": "Primary mobile number is required",
+  "addressRequired": "Full address is required",
+  "confirmSubmit": "Are you sure you want to submit the order?",
+  "placeOrder": "Place Order",
+  "fullName": "Full Name",
+  "phone": "Phone Number",
+  "address": "Full Address",
+  "city": {
+    "sulaymaniyah": "Sulaymaniyah",
+    "kurdistan": "Kurdistan",
+    "iraq": "Iraq"
+  }
+}
+,
 
   "cartPage": {
     "product": "Product",
@@ -184,27 +178,92 @@
     }
   },
 
-  "account": {
+ "account": {
     "title": "My Account",
-    "alertProfileUpdated": "Profile updated successfully",
-    "alertPasswordChanged": "Password changed successfully",
-    "alertLoggedOut": "Logged out",
     "logout": "Logout",
-    "profile": {
-      "title": "Profile Information",
-      "fullName": "Full Name",
-      "email": "Email",
-      "save": "Save Changes"
+    "saving": "Saving...",
+
+    "tabs": {
+      "dashboard": "Dashboard",
+      "orders": "Orders",
+      "addresses": "Addresses",
+      "account": "Account Details"
     },
-    "password": {
-      "title": "Change Password",
-      "current": "Current Password",
-      "new": "New Password",
-      "update": "Update Password"
+
+    "status": {
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "complete": "Completed",
+      "canceled": "Canceled"
     },
+
+    "errors": {
+      "loadProfile": "Failed to load profile",
+      "loadOrders": "Failed to load orders",
+      "update": "Update failed"
+    },
+
+    "alertProfileUpdated": "Your information has been saved successfully.",
+    "alertAddressesSaved": "Addresses saved successfully.",
+
+    "dashboard": {
+      "summary": "Account Summary",
+      "totalOrders": "Total Orders",
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "completed": "Completed",
+      "canceled": "Canceled"
+    },
+
+    "labels": {
+      "name": "Name:",
+      "fullName": "Full name:",
+      "mobile": "Mobile number:",
+      "phone1": "Primary phone:",
+      "phone2": "Secondary phone:",
+      "city": "City:",
+      "fullAddress": "Full address:",
+      "postalCode": "Postal code:"
+    },
+
     "orders": {
       "title": "My Orders",
-      "empty": "You haven't placed any orders yet."
+      "refresh": "Refresh",
+      "loading": "Loading...",
+      "empty": "You haven't placed any orders yet.",
+      "order": "Order",
+      "itemsCount": "Items count",
+      "shipping": "Shipping cost",
+      "discount": "Discount",
+      "total": "Total",
+      "cancelAvailable": "You can cancel for the next {{minutes}} minutes",
+      "cancelExpired": "Cancellation is not available after 2 hours",
+      "cancel": "Cancel order",
+      "canceledSuccess": "Order canceled successfully",
+      "cancelFailed": "Failed to cancel the order",
+      "cancelNote": "* Orders can only be canceled within 2 hours after placing the order and only when the status is PENDING."
+    },
+
+    "addresses": {
+      "title": "Addresses",
+      "savedInfoTitle": "Saved Information",
+      "editTitle": "Edit Address",
+      "save": "Save Address"
+    },
+
+    "profile": {
+      "title": "Account Details",
+      "save": "Save"
+    },
+
+    "placeholders": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "phone": "Mobile number",
+      "phone2": "Secondary phone",
+      "city": "City",
+      "address": "Full address",
+      "postalCode": "Postal code"
     }
   },
 

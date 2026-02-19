@@ -94,38 +94,32 @@
     "next": "التالي"
   },
 
-  "checkout": {
-    "yourOrder": "طلبك",
-    "product": "المنتج",
-    "subtotal": "المجموع الفرعي",
-    "total": "الإجمالي",
-    "billingDetails": "بيانات الفاتورة",
-
-    "firstName": "الاسم الأول *",
-    "lastName": "اسم العائلة *",
-    "company": "اسم الشركة (اختياري)",
-    "countryValue": "إيران",
-    "address": "عنوان الشارع *",
-    "city": "المدينة *",
-    "province": "المحافظة *",
-    "provinceDefault": "طهران",
-    "postalCode": "الرمز البريدي *",
-    "phone": "الهاتف *",
-    "email": "البريد الإلكتروني *",
-    "note": "ملاحظات الطلب (اختياري)",
-
-    "placeOrder": "تأكيد الطلب",
-    "alertEmptyCart": "سلتك فارغة!",
-    "alertSubmitted": "تم إرسال الطلب (تجريبي)",
-
-    "shipping": {
-      "chapaar": "چاپار (موصى به)",
-      "post": "البريد",
-      "tipax": "تيباكس",
-      "cargo": "كارغو",
-      "bus": "توصيل بالباص"
-    }
-  },
+"checkout": {
+  "yourOrder": "طلبك",
+  "billingDetails": "بيانات الفاتورة",
+  "subtotal": "المجموع الفرعي",
+  "total": "الإجمالي",
+  "shippingTitle": "الشحن",
+  "freeShipping": "شحن مجاني",
+  "paymentNote": "الدفع بدون بوابة. يمكن إلغاء الطلب خلال ساعتين.",
+  "alertEmptyCart": "السلة فارغة!",
+  "alertSubmitted": "تم تسجيل الطلب بنجاح",
+  "loginRequired": "يرجى تسجيل الدخول أولاً",
+  "fullNameRequired": "الاسم الكامل مطلوب",
+  "mobileRequired": "رقم الهاتف مطلوب",
+  "addressRequired": "العنوان الكامل مطلوب",
+  "confirmSubmit": "هل أنت متأكد من إتمام الطلب؟",
+  "placeOrder": "تأكيد الطلب",
+  "fullName": "الاسم الكامل",
+  "phone": "رقم الهاتف",
+  "address": "العنوان الكامل",
+  "city": {
+    "sulaymaniyah": "السليمانية",
+    "kurdistan": "كردستان",
+    "iraq": "العراق"
+  }
+}
+,
 
   "cartPage": {
     "product": "المنتج",
@@ -184,27 +178,92 @@
     }
   },
 
-  "account": {
+ "account": {
     "title": "حسابي",
-    "alertProfileUpdated": "تم تحديث الملف الشخصي بنجاح",
-    "alertPasswordChanged": "تم تغيير كلمة المرور بنجاح",
-    "alertLoggedOut": "تم تسجيل الخروج",
     "logout": "تسجيل الخروج",
-    "profile": {
-      "title": "معلومات الملف الشخصي",
-      "fullName": "الاسم الكامل",
-      "email": "البريد الإلكتروني",
-      "save": "حفظ التغييرات"
+    "saving": "جارٍ الحفظ...",
+
+    "tabs": {
+      "dashboard": "لوحة التحكم",
+      "orders": "الطلبات",
+      "addresses": "العناوين",
+      "account": "تفاصيل الحساب"
     },
-    "password": {
-      "title": "تغيير كلمة المرور",
-      "current": "كلمة المرور الحالية",
-      "new": "كلمة المرور الجديدة",
-      "update": "تحديث كلمة المرور"
+
+    "status": {
+      "pending": "قيد الانتظار",
+      "accepted": "تم القبول",
+      "complete": "مكتمل",
+      "canceled": "ملغي"
     },
+
+    "errors": {
+      "loadProfile": "فشل تحميل الملف الشخصي",
+      "loadOrders": "فشل تحميل الطلبات",
+      "update": "فشل التحديث"
+    },
+
+    "alertProfileUpdated": "تم حفظ معلوماتك بنجاح.",
+    "alertAddressesSaved": "تم حفظ العناوين بنجاح.",
+
+    "dashboard": {
+      "summary": "ملخص الحساب",
+      "totalOrders": "إجمالي الطلبات",
+      "pending": "قيد الانتظار",
+      "accepted": "تم القبول",
+      "completed": "مكتمل",
+      "canceled": "ملغي"
+    },
+
+    "labels": {
+      "name": "الاسم:",
+      "fullName": "الاسم الكامل:",
+      "mobile": "رقم الجوال:",
+      "phone1": "الرقم الأساسي:",
+      "phone2": "الرقم الإضافي:",
+      "city": "المدينة:",
+      "fullAddress": "العنوان الكامل:",
+      "postalCode": "الرمز البريدي:"
+    },
+
     "orders": {
       "title": "طلباتي",
-      "empty": "لم تقم بأي طلب بعد."
+      "refresh": "تحديث",
+      "loading": "جارٍ التحميل...",
+      "empty": "لم تقم بأي طلب بعد.",
+      "order": "طلب",
+      "itemsCount": "عدد العناصر",
+      "shipping": "تكلفة الشحن",
+      "discount": "خصم",
+      "total": "الإجمالي",
+      "cancelAvailable": "يمكنك الإلغاء خلال {{minutes}} دقيقة",
+      "cancelExpired": "لا يمكن الإلغاء بعد ساعتين",
+      "cancel": "إلغاء الطلب",
+      "canceledSuccess": "تم إلغاء الطلب بنجاح",
+      "cancelFailed": "فشل إلغاء الطلب",
+      "cancelNote": "* يمكن إلغاء الطلب خلال ساعتين فقط بعد إنشائه، وفقط عندما تكون الحالة قيد الانتظار."
+    },
+
+    "addresses": {
+      "title": "العناوين",
+      "savedInfoTitle": "المعلومات المسجلة",
+      "editTitle": "تعديل العنوان",
+      "save": "حفظ العنوان"
+    },
+
+    "profile": {
+      "title": "تفاصيل الحساب",
+      "save": "حفظ"
+    },
+
+    "placeholders": {
+      "firstName": "الاسم",
+      "lastName": "اسم العائلة",
+      "phone": "رقم الجوال",
+      "phone2": "رقم إضافي",
+      "city": "المدينة",
+      "address": "العنوان الكامل",
+      "postalCode": "الرمز البريدي"
     }
   },
 

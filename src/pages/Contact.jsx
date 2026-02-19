@@ -29,64 +29,6 @@ export default function Contact() {
 
       <section className="w-full px-4 md:px-10 mb-26 mt-20">
         <div className="w-full mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* FORM */}
-          <form
-            onSubmit={submitForm}
-            className="bg-white rounded-2xl p-6 md:p-8"
-          >
-            <h2 className="text-lg font-semibold mb-6">
-              {t("contact.form.title")}
-            </h2>
-
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm mb-1 block">
-                  {t("contact.form.nameLabel")}
-                </label>
-                <input
-                  name="name"
-                  value={form.name}
-                  onChange={handleChange}
-                  placeholder={t("contact.form.namePlaceholder")}
-                  className="w-full border rounded-lg px-4 py-3 text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="text-sm mb-1 block">
-                  {t("contact.form.phoneLabel")}
-                </label>
-                <input
-                  name="phone"
-                  value={form.phone}
-                  onChange={handleChange}
-                  placeholder={t("contact.form.phonePlaceholder")}
-                  className="w-full border rounded-lg px-4 py-3 text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="text-sm mb-1 block">
-                  {t("contact.form.messageLabel")}
-                </label>
-                <textarea
-                  name="message"
-                  value={form.message}
-                  onChange={handleChange}
-                  placeholder={t("contact.form.messagePlaceholder")}
-                  className="w-full border rounded-lg px-4 py-3 text-sm min-h-[140px]"
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-[#2B4168] text-white py-3 rounded-lg mt-6 font-medium"
-            >
-              {t("contact.form.sendButton")}
-            </button>
-          </form>
-
           {/* INFO */}
           <div className="flex flex-col justify-between gap-8">
             <div>

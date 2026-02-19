@@ -4,9 +4,13 @@ import ProductsDropdown from "./ProductsDropdown";
 import MobileTopBar from "./MobileTopBar";
 import { useTranslation } from "react-i18next";
 import LanguageSwitch from "../common/LanguageSwitch";
+import { getShopAccessToken } from "../../services/shopAuthApi";
 
 export default function Navbar() {
   const { t } = useTranslation();
+
+  const isLoggedIn = !!getShopAccessToken();
+  const accountHref = isLoggedIn ? "/account" : "/signin";
 
   return (
     <header className="w-full md:py-6 absolute top-14 md:top-0 md:relative z-50">
@@ -46,7 +50,7 @@ export default function Navbar() {
             <ShoppingCart size={22} />
           </Link>
 
-          <Link to="/account" className="flex items-center gap-2">
+          <Link to={accountHref} className="flex items-center gap-2">
             <span>{t("nav.account")}</span>
             <User size={22} />
           </Link>

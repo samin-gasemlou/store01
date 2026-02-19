@@ -1,70 +1,90 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import AuthCard from "../components/auth/AuthCard";
 import AuthInput from "../components/auth/AuthInput";
-import CitySelect from "../components/auth/CitySelect";
-import { cities } from "../data/cities";
+import * as shopAuthApi from "../services/shopAuthApi";
 
 export default function SignUp() {
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [pass, setPass] = useState("");
-  const [city, setCity] = useState("");
-  const [address, setAddress] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [password, setPassword] = useState("");
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
 
-  const submit = (e) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const submit = async (e) => {
     e.preventDefault();
-    // TODO: connect to api
+
+    const fullName1 = String(fullName || "").trim();
+    const mobile1 = String(mobile || "").trim();
+    const pass1 = String(password || "");
+
+    if (!fullName1)
+      return window.alert("Full name is required");
+    if (!mobile1)
+      return window.alert("Mobile number is required");
+    if (!pass1)
+      return window.alert("Password is required");
+
+    try {
+      setLoadingSubmit(true);
+
+      const out = await shopAuthApi.shopRegister({
+        fullName: fullName1,
+        mobile: mobile1,
+        password: pass1,
+      });
+
+      shopAuthApi.saveShopTokens(out);
+
+      const from = (location.state && location.state.from) || "/account";
+      navigate(from, { replace: true });
+    } catch (err) {
+      window.alert(
+        err?.data?.message || err?.message || "Registration failed"
+      );
+      console.error(err);
+    } finally {
+      setLoadingSubmit(false);
+    }
   };
 
   return (
     <section className="min-h-screen w-full flex items-center justify-center px-4 py-10 bg-white">
-      <AuthCard title="Sign in">
+      <AuthCard title="Sign Up">
         <form onSubmit={submit} className="space-y-5">
           <AuthInput
-            placeholder="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            placeholder="Full Name"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
           />
+
           <AuthInput
-            placeholder="Phone Number"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            placeholder="Mobile Number"
+            value={mobile}
+            onChange={(e) => setMobile(e.target.value)}
           />
+
           <AuthInput
             placeholder="Password"
             type="password"
-            value={pass}
-            onChange={(e) => setPass(e.target.value)}
-          />
-
-          <CitySelect value={city} onChange={setCity} options={cities} />
-
-          <AuthInput
-            placeholder="Address"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
 
           <button
             type="submit"
-            className="
-              w-full
-              mt-2
-              bg-[#2B4168]
-              text-white
-              rounded-[14px]
-              py-5
-              text-[20px]
-            "
+            disabled={loadingSubmit}
+            className="w-full mt-2 bg-[#2B4168] text-white rounded-[14px] py-5 text-[18px] disabled:opacity-60"
           >
-            Sing in
+            {loadingSubmit ? "Creating account..." : "Create Account"}
           </button>
 
-          <p className="text-center text-[18px] pt-2">
+          <p className="text-center text-[16px] pt-2">
             Already have an account?{" "}
             <Link to="/signin" className="text-blue-600">
-              Sign in
+              Sign In
             </Link>
           </p>
         </form>

@@ -16,8 +16,8 @@ import { useEffect, useState } from "react";
 function HomePage() {
 
 
-   const [items, setItems] = useState([]);
-  const [err, setErr] = useState("");
+   const [, setItems] = useState([]);
+  const [, setErr] = useState("");
 
   useEffect(() => {
     api("/products")

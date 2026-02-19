@@ -1,11 +1,15 @@
 import { useState, useEffect } from "react";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+
+// ✅ اگر این سرویس رو نداری، پایین همین پیام نسخه کاملش رو گذاشتم
+import { shopValidatePromo } from "../services/shopOrdersApi";
 
 export default function Cart() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const [cartItems, setCartItems] = useState(() => {
     try {
@@ -16,15 +20,23 @@ export default function Cart() {
   });
 
   // ✅ key ثابت برای ترجمه
-  const shippingMethods = [
-    { id: 1, key: "chapaar", price: 0 },
-    { id: 2, key: "post", price: 85000 },
-    { id: 3, key: "tipax", price: 120000 },
-    { id: 4, key: "cargo", price: 150000 },
-    { id: 5, key: "bus", price: 100000 },
-  ];
 
-  const [shipping, setShipping] = useState(shippingMethods[0]);
+  // ✅ واقعی: کد تخفیف
+  const [coupon, setCoupon] = useState(() => {
+    try {
+      return localStorage.getItem("cart_coupon") || "";
+    } catch {
+      return "";
+    }
+  });
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponApplied, setCouponApplied] = useState(() => {
+    try {
+      return localStorage.getItem("cart_coupon_applied") === "1";
+    } catch {
+      return false;
+    }
+  });
 
   useEffect(() => {
     const handleCartUpdate = () => {
@@ -45,11 +57,11 @@ export default function Cart() {
       item.id === id
         ? {
             ...item,
-            qty:
-              type === "inc" ? item.qty + 1 : Math.max(1, item.qty - 1),
+            qty: type === "inc" ? item.qty + 1 : Math.max(1, item.qty - 1),
           }
         : item
     );
+
     setCartItems(updated);
     localStorage.setItem("cart", JSON.stringify(updated));
     window.dispatchEvent(new Event("cartUpdated"));
@@ -62,11 +74,116 @@ export default function Cart() {
     window.dispatchEvent(new Event("cartUpdated"));
   };
 
-  const subtotal = cartItems.reduce(
-    (sum, item) => sum + item.price * item.qty,
-    0
-  );
-  const total = subtotal + shipping.price;
+  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.qty, 0);
+
+  // ✅ discount واقعی (از localStorage)
+  const discount = (() => {
+    try {
+      return Number(localStorage.getItem("cart_discount") || 0) || 0;
+    } catch {
+      return 0;
+    }
+  })();
+
+  // ✅ total نهایی با ارسال و تخفیف
+  const total = Math.max(0, subtotal - discount);
+
+  // ✅ همیشه snapshot سبد را برای Checkout ذخیره کن (بدون تغییر UI)
+  useEffect(() => {
+    try {
+      const snapshot = {
+        items: cartItems.map((it) => ({
+          product: String(it.id), // باید Product _id باشد
+          quantity: Number(it.qty || 1),
+          price: Number(it.price || 0),
+          title: it.title,
+          img: it.img,
+        })),
+        subtotal,
+        discount,
+        promoCode: couponApplied ? String(coupon || "").trim() : "",
+        total,
+        updatedAt: Date.now(),
+      };
+      localStorage.setItem("checkout_snapshot", JSON.stringify(snapshot));
+    } catch {
+      // ignore
+    }
+  }, [cartItems, subtotal, discount, coupon, couponApplied, total]);
+
+  const applyCoupon = async () => {
+    const code = String(coupon || "").trim();
+    if (!code) {
+      window.alert(t("cartPage.discountCode") || "Discount code is required");
+      return;
+    }
+
+    try {
+      setCouponLoading(true);
+
+      // ✅ میره بک و درصد/مقدار تخفیف رو برمیگردونه
+      // اگر بک نداری: سرویس طوری نوشته شده که graceful fail کنه و پیام بده
+      const out = await shopValidatePromo({
+        code,
+        subtotal,
+      });
+
+      // out: { ok:true, discount:number, promoCode:string }
+      const d = Math.max(0, Number(out?.discount || 0) || 0);
+
+      localStorage.setItem("cart_coupon", code);
+      localStorage.setItem("cart_coupon_applied", "1");
+      localStorage.setItem("cart_discount", String(d));
+
+      setCouponApplied(true);
+
+      window.alert(
+        d > 0
+          ? `Coupon applied. Discount: ${d.toLocaleString()}`
+          : "Coupon applied."
+      );
+    } catch (err) {
+      // اگر invalid بود، پاک کن
+      localStorage.removeItem("cart_coupon_applied");
+      localStorage.setItem("cart_discount", "0");
+      setCouponApplied(false);
+
+      window.alert(err?.data?.message || err?.message || "Invalid promo code");
+      console.error(err);
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const updateCart = () => {
+    // ✅ چون cartItems همین الان sync شده، فقط snapshot را force ذخیره می‌کنیم
+    try {
+      window.dispatchEvent(new Event("cartUpdated"));
+      window.alert("Cart updated");
+    } catch {
+      // ignore
+    }
+  };
+
+  const goCheckout = (e) => {
+    e.preventDefault();
+
+    // ✅ اگر کارت خالیه
+    if (!cartItems.length) {
+      window.alert(t("cart.empty") || "Cart is empty");
+      return;
+    }
+
+    // ✅ اگر لاگین نیست
+    const token = localStorage.getItem("shop_access_token");
+    if (!token) {
+      window.alert("Please sign in first");
+      navigate("/signin", { replace: true, state: { from: "/checkout" } });
+      return;
+    }
+
+    navigate("/checkout");
+  };
 
   return (
     <div className="w-full flex flex-col items-center justify-center">
@@ -84,9 +201,7 @@ export default function Cart() {
             </div>
 
             {cartItems.length === 0 ? (
-              <p className="text-sm text-gray-500 py-6">
-                {t("cart.empty")}
-              </p>
+              <p className="text-sm text-gray-500 py-6">{t("cart.empty")}</p>
             ) : (
               cartItems.map((item) => (
                 <div
@@ -132,8 +247,7 @@ export default function Cart() {
                   {/* TOTAL */}
                   <div className="flex items-center justify-between">
                     <span className="text-[#2B4168] font-medium">
-                      {(item.price * item.qty).toLocaleString()}{" "}
-                      {t("cart.currency")}
+                      {(item.price * item.qty).toLocaleString()} {t("cart.currency")}
                     </span>
                     <button
                       onClick={() => removeItem(item.id)}
@@ -153,23 +267,35 @@ export default function Cart() {
               <input
                 placeholder={t("cartPage.discountCode")}
                 className="border rounded-lg px-4 py-2 text-sm"
+                value={coupon}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setCoupon(v);
+                  try {
+                    localStorage.setItem("cart_coupon", v);
+                  } catch {
+                    // ignore
+                  }
+                }}
               />
               <button
                 className="bg-[#2b41682a] px-6 py-2 rounded-lg text-sm"
                 type="button"
+                onClick={applyCoupon}
+                disabled={couponLoading}
               >
-                {t("cartPage.applyCoupon")}
+                {couponLoading ? "..." : t("cartPage.applyCoupon")}
               </button>
               <button
                 className="bg-[#2b41682a] px-6 py-2 rounded-lg text-sm"
                 type="button"
+                onClick={updateCart}
               >
                 {t("cartPage.updateCart")}
               </button>
             </div>
-          </div>
 
-          {/* SUMMARY */}
+          {/* SUMMARY (moved from right card) */}
           <div className="bg-white rounded-2xl p-6 h-fit">
             <h3 className="font-semibold mb-4">{t("cartPage.cartTotals")}</h3>
 
@@ -180,28 +306,7 @@ export default function Cart() {
               </span>
             </div>
 
-            {/* SHIPPING */}
-            <div className="space-y-3 mb-4">
-              {shippingMethods.map((method) => (
-                <label
-                  key={method.id}
-                  className="flex items-center gap-2 text-sm cursor-pointer"
-                >
-                  <input
-                    type="radio"
-                    checked={shipping.id === method.id}
-                    onChange={() => setShipping(method)}
-                  />
-                  {t(`cartPage.shipping.${method.key}`)}
-                  {method.price > 0 && (
-                    <span className="text-[#2B4168]">
-                      {method.price.toLocaleString()} {t("cart.currency")}
-                    </span>
-                  )}
-                </label>
-              ))}
-            </div>
-
+            {/* ✅ اگر discount داری، UI رو تغییر نمیدیم؛ فقط total خودش کم میشه */}
             <div className="flex justify-between font-semibold mb-6">
               <span>{t("checkout.total")}</span>
               <span className="text-[#2B4168]">
@@ -209,7 +314,8 @@ export default function Cart() {
               </span>
             </div>
 
-            <Link to={"/checkout"}>
+            {/* ✅ بدون تغییر ظاهر: فقط onClick رو واقعی کردیم */}
+            <Link to={"/checkout"} onClick={goCheckout}>
               <button
                 className="w-full bg-[#2b41682a] py-3 rounded-lg font-medium"
                 type="button"
@@ -219,6 +325,10 @@ export default function Cart() {
             </Link>
           </div>
         </div>
+
+          </div>
+
+          
       </section>
 
       <Footer />

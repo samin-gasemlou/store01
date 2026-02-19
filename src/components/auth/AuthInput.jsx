@@ -13,7 +13,7 @@ export default function AuthInput({ placeholder, type = "text", value, onChange 
         py-5
         text-[18px]
         outline-none
-        placeholder:text-black
+        placeholder:text-black text-black
       "
     />
   );

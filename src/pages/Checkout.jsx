@@ -1,34 +1,23 @@
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import { shopCreateOrder } from "../services/shopOrdersApi";
 
 export default function Checkout() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
-    company: "",
-    country: "Iran",
+    fullName: "",
+    mobile1: "",
+    mobile2: "",
+    city: "sulaymaniyah",
     address: "",
-    city: "",
-    province: "",
-    postalCode: "",
-    phone: "",
-    email: "",
     note: "",
+    promoCode: "",
   });
-
-  // ✅ وقتی زبان عوض شد، فقط فیلدهای ثابت/پیشفرض رو (اگر خالی هستند) هماهنگ کن
-  useEffect(() => {
-    setForm((prev) => ({
-      ...prev,
-      country: t("checkout.countryValue"),
-      province: prev.province || t("checkout.provinceDefault"),
-    }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [i18n.language]);
 
   const [cartItems, setCartItems] = useState(() => {
     try {
@@ -38,20 +27,10 @@ export default function Checkout() {
     }
   });
 
-  const shippingMethods = [
-    { id: 1, key: "chapaar", price: 0 },
-    { id: 2, key: "post", price: 85000 },
-    { id: 3, key: "tipax", price: 120000 },
-    { id: 4, key: "cargo", price: 150000 },
-  ];
-
-  const [shipping, setShipping] = useState(shippingMethods[0]);
-
   useEffect(() => {
     const handleCartUpdate = () => {
       try {
-        const updatedCart = JSON.parse(localStorage.getItem("cart")) || [];
-        setCartItems(updatedCart);
+        setCartItems(JSON.parse(localStorage.getItem("cart")) || []);
       } catch {
         setCartItems([]);
       }
@@ -60,198 +39,204 @@ export default function Checkout() {
     return () => window.removeEventListener("cartUpdated", handleCartUpdate);
   }, []);
 
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.qty, 0);
-  const total = subtotal + shipping.price;
+  const cityOptions = useMemo(
+    console.log(i18n.language),
+    () => [
+      { value: "sulaymaniyah", label: t("checkout.city.sulaymaniyah") },
+      { value: "kurdistan", label: t("checkout.city.kurdistan") },
+      { value: "iraq", label: t("checkout.city.iraq") },
+    ],
+    [t]
+    
+  );
+
+  const subtotal = useMemo(
+    () =>
+      cartItems.reduce(
+        (sum, item) => sum + Number(item.price || 0) * Number(item.qty || 0),
+        0
+      ),
+    [cartItems]
+  );
+
+  const totalQty = useMemo(
+    () => cartItems.reduce((s, it) => s + Number(it.qty || 0), 0),
+    [cartItems]
+  );
+
+  const isFreeShipping = totalQty >= 2;
+  const shippingPrice = isFreeShipping ? 0 : 85000;
+  const total = subtotal + shippingPrice;
+
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const submitOrder = () => {
-    if (cartItems.length === 0) {
+  const normalizePhone = (v) =>
+    String(v || "").trim().replace(/[\s-]/g, "");
+
+  const submitOrder = async () => {
+    const token = localStorage.getItem("shop_access_token");
+    if (!token) {
+      alert(t("checkout.loginRequired"));
+      navigate("/signin", { replace: true, state: { from: "/checkout" } });
+      return;
+    }
+
+    if (!cartItems.length) {
       alert(t("checkout.alertEmptyCart"));
       return;
     }
 
-    console.log("ORDER DATA:", { form, cartItems, shipping, total });
-    alert(t("checkout.alertSubmitted"));
+    if (!form.fullName.trim())
+      return alert(t("checkout.fullNameRequired"));
 
-    localStorage.removeItem("cart");
-    window.dispatchEvent(new Event("cartUpdated"));
-    setCartItems([]);
+    if (!form.mobile1.trim())
+      return alert(t("checkout.mobileRequired"));
+
+    if (!form.address.trim())
+      return alert(t("checkout.addressRequired"));
+
+    const ok = window.confirm(t("checkout.confirmSubmit"));
+    if (!ok) return;
+
+    const items = cartItems.map((it) => ({
+      product: String(it.id),
+      quantity: Number(it.qty || 1),
+    }));
+
+    try {
+      setLoading(true);
+
+      await shopCreateOrder({
+        items,
+        city: form.city,
+        address: form.address,
+        customerNote: form.note,
+        promoCode: form.promoCode,
+        fullName: form.fullName,
+        mobile1: normalizePhone(form.mobile1),
+        mobile2: normalizePhone(form.mobile2),
+        shippingMethod: "post",
+      });
+
+      alert(t("checkout.alertSubmitted"));
+
+      localStorage.removeItem("cart");
+      window.dispatchEvent(new Event("cartUpdated"));
+      navigate("/account");
+    } catch (err) {
+      alert(err?.message || "Error");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="w-full flex flex-col items-center">
+    <div className="w-full flex flex-col items-center -z-10">
       <Navbar />
 
-      <section className="w-full px-2 mt-20 md:px-10 pb-20">
-        <div className="w-full mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10">
-          {/* ORDER SUMMARY */}
-          <div className="bg-white rounded-2xl p-6 h-fit">
-            <h3 className="font-semibold mb-4">{t("checkout.yourOrder")}</h3>
+      <section className="w-full px-4 mt-20 pb-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
 
-            <div className="text-sm text-gray-500 grid grid-cols-2 mb-4">
-              <span>{t("checkout.product")}</span>
-              <span className="text-right">{t("checkout.subtotal")}</span>
-            </div>
+          {/* SUMMARY */}
+          <div className="bg-white rounded-2xl p-6 border">
+            <h3 className="font-semibold mb-4">
+              {t("checkout.yourOrder")}
+            </h3>
 
-            {cartItems.map((item) => (
-              <div
-                key={item.id}
-                className="flex justify-between items-center border-t py-4 text-sm"
-              >
-                <div className="flex items-center gap-3">
-                  <img
-                    src={item.img}
-                    className="w-14 h-14 rounded-lg object-cover"
-                    alt=""
-                  />
+            {cartItems.length === 0 ? (
+              <p>{t("cart.empty")}</p>
+            ) : (
+              cartItems.map((item) => (
+                <div key={item.id} className="flex justify-between py-2">
+                  <span>{item.title} × {item.qty}</span>
                   <span>
-                    {item.title} × {item.qty}
+                    {(item.price * item.qty).toLocaleString()}{" "}
+                    {t("cart.currency")}
                   </span>
                 </div>
+              ))
+            )}
 
-                <span className="text-[#2B4168]">
-                  {(item.price * item.qty).toLocaleString()} {t("cart.currency")}
-                </span>
-              </div>
-            ))}
-
-            <div className="border-t pt-4 space-y-3 text-sm">
+            <div className="border-t pt-4 mt-4 space-y-2">
               <div className="flex justify-between">
                 <span>{t("checkout.subtotal")}</span>
+                <span>{subtotal.toLocaleString()}</span>
+              </div>
+
+              <div className="flex justify-between">
+                <span>{t("checkout.shippingTitle")}</span>
                 <span>
-                  {subtotal.toLocaleString()} {t("cart.currency")}
+                  {isFreeShipping
+                    ? t("checkout.freeShipping")
+                    : shippingPrice.toLocaleString()}
                 </span>
               </div>
 
-              <div className="space-y-2">
-                {shippingMethods.map((method) => (
-                  <label key={method.id} className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      checked={shipping.id === method.id}
-                      onChange={() => setShipping(method)}
-                    />
-                    {t(`checkout.shipping.${method.key}`)}
-                    {method.price > 0 && (
-                      <span className="text-[#2B4168]">
-                        {method.price.toLocaleString()} {t("cart.currency")}
-                      </span>
-                    )}
-                  </label>
-                ))}
-              </div>
-
-              <div className="flex justify-between font-semibold text-base pt-4">
+              <div className="flex justify-between font-bold">
                 <span>{t("checkout.total")}</span>
-                <span className="text-[#2B4168]">
-                  {total.toLocaleString()} {t("cart.currency")}
-                </span>
+                <span>{total.toLocaleString()}</span>
               </div>
+
+              <p className="text-xs text-gray-500">
+                {t("checkout.paymentNote")}
+              </p>
             </div>
           </div>
 
-          {/* BILLING DETAILS */}
-          <div className="bg-white rounded-2xl p-6">
-            <h3 className="font-semibold mb-4">{t("checkout.billingDetails")}</h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input
-                name="firstName"
-                value={form.firstName}
-                placeholder={t("checkout.firstName")}
-                onChange={handleChange}
-                className="border rounded-lg px-4 py-2 text-sm"
-              />
-              <input
-                name="lastName"
-                value={form.lastName}
-                placeholder={t("checkout.lastName")}
-                onChange={handleChange}
-                className="border rounded-lg px-4 py-2 text-sm"
-              />
-            </div>
+          {/* FORM */}
+          <div className="bg-white rounded-2xl p-6 border">
+            <h3 className="font-semibold mb-4">
+              {t("checkout.billingDetails")}
+            </h3>
 
             <input
-              name="company"
-              value={form.company}
-              placeholder={t("checkout.company")}
+              name="fullName"
+              value={form.fullName}
+              placeholder={t("checkout.fullName")}
               onChange={handleChange}
-              className="border rounded-lg px-4 py-2 text-sm w-full mt-4"
+              className="border rounded-xl px-4 py-3 w-full mb-4"
             />
 
-            <input
-              name="country"
-              value={form.country}
-              disabled
-              className="border rounded-lg px-4 py-2 text-sm w-full mt-4 bg-gray-50"
-            />
+            <select
+              name="city"
+              value={form.city}
+              onChange={handleChange}
+              className="border rounded-xl px-4 py-3 w-full mb-4"
+            >
+              {cityOptions.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
 
             <input
+              name="mobile1"
+              value={form.mobile1}
+              placeholder={t("checkout.phone")}
+              onChange={handleChange}
+              className="border rounded-xl px-4 py-3 w-full mb-4"
+            />
+
+            <textarea
               name="address"
               value={form.address}
               placeholder={t("checkout.address")}
               onChange={handleChange}
-              className="border rounded-lg px-4 py-2 text-sm w-full mt-4"
-            />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              <input
-                name="city"
-                value={form.city}
-                placeholder={t("checkout.city")}
-                onChange={handleChange}
-                className="border rounded-lg px-4 py-2 text-sm"
-              />
-              <input
-                name="province"
-                value={form.province}
-                placeholder={t("checkout.province")}
-                onChange={handleChange}
-                className="border rounded-lg px-4 py-2 text-sm"
-              />
-            </div>
-
-            <input
-              name="postalCode"
-              value={form.postalCode}
-              placeholder={t("checkout.postalCode")}
-              onChange={handleChange}
-              className="border rounded-lg px-4 py-2 text-sm w-full mt-4"
-            />
-
-            <input
-              name="phone"
-              value={form.phone}
-              placeholder={t("checkout.phone")}
-              onChange={handleChange}
-              className="border rounded-lg px-4 py-2 text-sm w-full mt-4"
-            />
-
-            <input
-              name="email"
-              value={form.email}
-              placeholder={t("checkout.email")}
-              onChange={handleChange}
-              className="border rounded-lg px-4 py-2 text-sm w-full mt-4"
-            />
-
-            <textarea
-              name="note"
-              value={form.note}
-              placeholder={t("checkout.note")}
-              onChange={handleChange}
-              className="border rounded-lg px-4 py-2 text-sm w-full mt-4 min-h-[100px]"
+              className="border rounded-xl px-4 py-3 w-full mb-4"
             />
 
             <button
               onClick={submitOrder}
-              className="w-full bg-[#2b41682a] py-3 rounded-lg font-medium mt-6"
+              disabled={loading}
+              className="w-full bg-[#2b41682a] py-3 rounded-xl"
             >
-              {t("checkout.placeOrder")}
+              {loading ? "..." : t("checkout.placeOrder")}
             </button>
           </div>
         </div>

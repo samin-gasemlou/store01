@@ -14,10 +14,12 @@ import SearchPage from "./pages/SearchPage";
 import Wish from "./pages/Wish";
 import AccountPage from "./pages/AccountPage";
 
+import RequireShopAuth from "./components/auth/RequireShopAuth";
+
 export default function App() {
   return (
     <BrowserRouter>
-      <ScrollToTop /> {/* ✅ این باید اینجا باشه */}
+      <ScrollToTop />
 
       <Routes>
         {/* AUTH بدون Layout */}
@@ -40,7 +42,16 @@ export default function App() {
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/search" element={<SearchPage />} />
                 <Route path="/wish" element={<Wish />} />
-                <Route path="/account" element={<AccountPage />} />
+
+                {/* ✅ محافظت از اکانت */}
+                <Route
+                  path="/account"
+                  element={
+                    <RequireShopAuth>
+                      <AccountPage />
+                    </RequireShopAuth>
+                  }
+                />
               </Routes>
             </MainLayout>
           }

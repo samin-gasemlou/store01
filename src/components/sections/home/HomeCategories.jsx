@@ -1,25 +1,39 @@
 import { useEffect, useRef, useState } from "react";
 import CategoryCard from "./CategoryCard";
-import { categories } from "./data";
+import { categories as localCategories } from "./data";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+// ✅ اتصال به بک (همون فایلی که قبلاً دادم)
+import { fetchPublicCategories, slugify } from "../../../services/shopCatalogApi";
+
 export default function HomeCategories() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const trackRef = useRef(null);
   const itemRefs = useRef([]);
+
+  // ✅ Desktop slider (lg+)
+  const desktopTrackRef = useRef(null);
 
   const [active, setActive] = useState(0);
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== "undefined" ? window.innerWidth < 640 : true
   );
 
+  const [isDesktop, setIsDesktop] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth >= 1024 : false
+  );
+
+  // ✅ دیتای دسته‌بندی از بک (با fallback عکس از لوکال)
+  const [categories, setCategories] = useState(() => localCategories || []);
+
   useEffect(() => {
     const onResize = () => {
       const mobile = window.innerWidth < 640;
       setIsMobile(mobile);
+      setIsDesktop(window.innerWidth >= 1024);
       if (!mobile) setActive(0);
     };
 
@@ -38,6 +52,87 @@ export default function HomeCategories() {
       behavior: "smooth",
     });
   };
+
+  // ✅ Desktop scroll helpers (بدون تغییر UI موبایل)
+  const canDesktopScroll = isDesktop && categories.length > 6;
+  const scrollDesktopBy = (dir) => {
+    const el = desktopTrackRef.current;
+    if (!el) return;
+    const amount = Math.max(200, Math.floor(el.clientWidth * 0.85));
+    el.scrollBy({ left: dir * amount, behavior: "smooth" });
+  };
+
+  // ✅ دریافت دسته‌بندی‌ها از بک
+  useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      try {
+        const lang = (i18n.language || "en").split("-")[0];
+
+        const res = await fetchPublicCategories({ limit: 200 });
+        const data = Array.isArray(res?.data) ? res.data : [];
+
+        // برای اینکه UI نشکنه: عکس‌ها را از لوکال هم map می‌کنیم
+        const localBySlug = new Map(
+          (localCategories || []).map((c) => [String(c.slug || ""), c])
+        );
+
+        const normalized = data
+          .map((c) => {
+            const title =
+              (lang === "ar"
+                ? c?.name_ar
+                : lang === "ku"
+                ? c?.name_kur || c?.name_ku
+                : c?.name_en) ||
+              c?.name_en ||
+              c?.name_ar ||
+              c?.name_kur ||
+              c?.name_ku ||
+              c?.name ||
+              "";
+
+            const slug = c?.slug || slugify(c?.name_en || title);
+            const local = localBySlug.get(String(slug)) || null;
+
+            // بک ممکنه یکی از این فیلدها رو داشته باشه
+            const img =
+              c?.img ||
+              c?.image ||
+              c?.icon ||
+              c?.thumbnail ||
+              c?.cover ||
+              c?.banner ||
+              local?.img ||
+              "";
+
+            return {
+              // HomeCategories از item.id و item.slug و item.titleKey و item.img استفاده می‌کنه
+              id: c?._id || c?.id || slug,
+              slug,
+              // چون t(item.titleKey) بدون defaultValue هست:
+              // titleKey را خودِ متن عنوان می‌گذاریم تا همان نمایش داده شود
+              titleKey: title || slug,
+              img,
+            };
+          })
+          .filter((x) => x?.id && x?.slug);
+
+        if (mounted) {
+          // اگر بک خالی بود fallback لوکال را نگه داریم
+          setCategories(normalized.length ? normalized : (localCategories || []));
+        }
+      } catch {
+        // در صورت خطا، لوکال را نگه می‌داریم تا UI خراب نشود
+        if (mounted) setCategories(localCategories || []);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [i18n.language]);
 
   // موبایل: 2 کارت همزمان => آخرین ایندکس قابل نمایش = length - 2
   const maxIndex = Math.max(0, categories.length - 2);
@@ -142,28 +237,65 @@ export default function HomeCategories() {
           ))}
         </div>
 
-        {/* ✅ sm+ : grid تمام عرض */}
-        <div
-          className="
-            hidden sm:grid
-            sm:grid-cols-3
-            md:grid-cols-4
-            lg:grid-cols-6
-            gap-4
-            md:gap-6
-            lg:gap-8
-          "
-        >
-          {categories.map((item) => (
-            <Link
-              key={item.id}
-              to={`/store/${encodeURIComponent(item.slug)}`}
-              className="w-full"
+        {/* ✅ sm+ : اگر lg+ و تعداد بیشتر از 6 شد، اسکرول افقی با فلش‌ها */}
+        {canDesktopScroll ? (
+          <div className="hidden lg:block relative">
+            <button
+              type="button"
+              onClick={() => scrollDesktopBy(-1)}
+              className="absolute -left-3 top-1/2 -translate-y-1/2 z-10 bg-white p-2 rounded-full border border-[#1C1E1F] shadow-md"
+              aria-label="Previous categories"
             >
-              <CategoryCard title={t(item.titleKey)} img={item.img} />
-            </Link>
-          ))}
-        </div>
+              <ChevronLeft size={14} />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => scrollDesktopBy(1)}
+              className="absolute -right-3 top-1/2 -translate-y-1/2 z-10 bg-white p-2 rounded-full border border-[#1C1E1F] shadow-md"
+              aria-label="Next categories"
+            >
+              <ChevronRight size={14} />
+            </button>
+
+            <div
+              ref={desktopTrackRef}
+              className="flex gap-8 overflow-x-auto no-scrollbar scroll-smooth py-1"
+            >
+              {categories.map((item) => (
+                <Link
+                  key={item.id}
+                  to={`/store/${encodeURIComponent(item.slug)}`}
+                  className="shrink-0 w-[calc((100%-40px)/6)]"
+                >
+                  <CategoryCard title={t(item.titleKey)} img={item.img} />
+                </Link>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div
+            className="
+              hidden sm:grid
+              sm:grid-cols-3
+              md:grid-cols-4
+              lg:grid-cols-6
+              gap-4
+              md:gap-6
+              lg:gap-8
+            "
+          >
+            {categories.map((item) => (
+              <Link
+                key={item.id}
+                to={`/store/${encodeURIComponent(item.slug)}`}
+                className="w-full"
+              >
+                <CategoryCard title={t(item.titleKey)} img={item.img} />
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

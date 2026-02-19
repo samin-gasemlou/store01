@@ -1,14 +1,12 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import ProductCard from "../../common/ProductCard";
-import { products as allProducts } from "../../../data/products";
 import { useTranslation } from "react-i18next";
+import * as productsApi from "../../../services/shopProductsApi";
 
 const AUTOPLAY_DELAY = 4000;
 
 /**
- * ✅ RTL-safe scroll helpers
- * normalizedLeft همیشه مثل LTR معنی میده:
- * 0 = چپ‌ترین، max = راست‌ترین (صرف نظر از RTL browser behavior)
+ * RTL-safe scroll helpers
  */
 function detectRtlScrollType() {
   if (typeof document === "undefined") return "reverse";
@@ -55,16 +53,9 @@ function getNormalizedScrollLeft(el, isRTL) {
   const max = getMaxScrollLeft(el);
   if (!isRTL) return el.scrollLeft;
 
-  if (RTL_SCROLL_TYPE === "negative") {
-    // Firefox: rightmost 0, leftmost -max
-    return el.scrollLeft + max;
-  }
-  if (RTL_SCROLL_TYPE === "default") {
-    // Safari: rightmost 0, leftmost max
-    return max - el.scrollLeft;
-  }
-  // Chrome/Edge reverse: leftmost 0, rightmost max
-  return el.scrollLeft;
+  if (RTL_SCROLL_TYPE === "negative") return el.scrollLeft + max;
+  if (RTL_SCROLL_TYPE === "default") return max - el.scrollLeft;
+  return el.scrollLeft; // reverse (Chrome/Edge)
 }
 
 function toNativeScrollLeft(el, normalizedLeft, isRTL) {
@@ -85,6 +76,56 @@ function scrollToNormalized(el, normalizedLeft, isRTL, behavior = "auto") {
   });
 }
 
+const BASE_URL =
+  (import.meta?.env?.VITE_API_BASE_URL || "").replace(/\/$/, "") ||
+  "http://localhost:4000";
+
+function toAbsImg(url) {
+  if (!url) return "";
+  const s = String(url);
+  if (s.startsWith("http://") || s.startsWith("https://")) return s;
+  return `${BASE_URL}${s.startsWith("/") ? "" : "/"}${s}`;
+}
+
+/**
+ * ✅ normalize برای اینکه:
+ * "make up" == "makeup" == "Make-Up" == "MAKE_UP"
+ */
+function normalizeKey(input) {
+  return String(input || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\u200C\u200D]/g, "") // ZWNJ/ZWJ
+    .replace(/[\s\-_]+/g, "") // spaces, hyphen, underscore -> remove
+    .replace(/[^\p{L}\p{N}]+/gu, ""); // remove other symbols (unicode-safe)
+}
+
+function mapProductToCard(p) {
+  const id = p?._id ?? p?.id ?? "";
+  const title = p?.title ?? p?.name_fa ?? p?.name_en ?? p?.name ?? "";
+
+  const imgRaw =
+    p?.img ??
+    p?.mainImage ??
+    (Array.isArray(p?.images) ? p.images[0] : "") ??
+    "";
+
+  const price = p?.price ?? p?.salePrice ?? p?.finalPrice ?? p?.amount ?? 0;
+
+  // ✅ بک شما categoryName / subCategoryName میده
+  const category = p?.categoryName ?? p?.category ?? "";
+  const subCategory = p?.subCategoryName ?? p?.subCategory ?? "";
+
+  return {
+    id: String(id),
+    title,
+    img: toAbsImg(imgRaw),
+    price,
+    category,
+    subCategory,
+  };
+}
+
 export default function RelatedProducts({ currentProductId, currentCategory }) {
   const { t, i18n } = useTranslation();
 
@@ -99,22 +140,63 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
   const rafRef = useRef(null);
   const lockJumpRef = useRef(false);
 
+  const [loading, setLoading] = useState(true);
+  const [items, setItems] = useState([]);
+
+  useEffect(() => {
+    let alive = true;
+
+    async function run() {
+      try {
+        setLoading(true);
+
+        const out = await productsApi.shopListProducts({ page: 1, limit: 500 });
+
+        const raw =
+          (Array.isArray(out) ? out : null) ||
+          (Array.isArray(out?.items) ? out.items : null) ||
+          (Array.isArray(out?.data) ? out.data : null) ||
+          (Array.isArray(out?.products) ? out.products : null) ||
+          [];
+
+        const mapped = raw.map(mapProductToCard);
+
+        if (!alive) return;
+        setItems(mapped);
+      } catch {
+        if (!alive) return;
+        setItems([]);
+      } finally {
+        if (alive) setLoading(false);
+      }
+    }
+
+    run();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
   const baseProducts = useMemo(() => {
-    return allProducts
-      .filter(
-        (p) =>
-          p.category === currentCategory &&
-          String(p.id) !== String(currentProductId)
-      )
+    if (!items.length) return [];
+
+    const catNorm = normalizeKey(currentCategory);
+    if (!catNorm) return [];
+
+    return items
+      .filter((p) => {
+        const sameCategory = normalizeKey(p.category) === catNorm;
+        const notSameProduct = String(p.id) !== String(currentProductId);
+        return sameCategory && notSameProduct;
+      })
       .slice(0, 10);
-  }, [currentProductId, currentCategory]);
+  }, [items, currentProductId, currentCategory]);
 
   const loopProducts = useMemo(() => {
     if (!baseProducts.length) return [];
     return [...baseProducts, ...baseProducts, ...baseProducts];
   }, [baseProducts]);
 
-  // ✅ segment size
   useEffect(() => {
     const calc = () => {
       const item = firstItemRef.current;
@@ -130,7 +212,6 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
     return () => window.removeEventListener("resize", calc);
   }, [baseProducts.length]);
 
-  // ✅ start from middle segment (RTL-safe)
   useEffect(() => {
     const el = sliderRef.current;
     if (!el || !baseProducts.length) return;
@@ -147,7 +228,6 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
     });
   }, [baseProducts.length, isRTL]);
 
-  // ✅ infinite loop (RTL-safe)
   const onScroll = () => {
     const el = sliderRef.current;
     if (!el) return;
@@ -181,7 +261,6 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
     });
   };
 
-  // ✅ group scroll (RTL-safe)
   const scrollByGroup = (dir = 1) => {
     const el = sliderRef.current;
     const item = firstItemRef.current;
@@ -197,7 +276,6 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
     scrollToNormalized(el, target, isRTL, "smooth");
   };
 
-  // ✅ autoplay
   useEffect(() => {
     const el = sliderRef.current;
     if (!el) return;
@@ -210,7 +288,6 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isRTL]);
 
-  // ✅ Drag (RTL-safe like your other component)
   useEffect(() => {
     const el = sliderRef.current;
     if (!el) return;
@@ -269,9 +346,8 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
     };
   }, [isRTL]);
 
-  if (!baseProducts.length) return null;
+  if (loading || !baseProducts.length) return null;
 
-  // ✅ icons swapped in RTL
   const prevIcon = "/arrow-circle-left.svg";
   const nextIcon = "/arrow-circle-left3.svg";
   const leftIcon = isRTL ? nextIcon : prevIcon;
@@ -280,9 +356,7 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
   return (
     <section className="w-full px-4 mt-6 mb-24 overflow-x-hidden">
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-lg md:text-xl font-semibold">
-          {t("single.related")}
-        </h3>
+        <h3 className="text-lg md:text-xl font-semibold">{t("single.related")}</h3>
 
         <div className="flex gap-2 shrink-0">
           <button
@@ -303,7 +377,6 @@ export default function RelatedProducts({ currentProductId, currentCategory }) {
         </div>
       </div>
 
-      {/* ✅ now use real dir (no mirroring hacks) */}
       <div
         ref={sliderRef}
         dir={isRTL ? "rtl" : "ltr"}
