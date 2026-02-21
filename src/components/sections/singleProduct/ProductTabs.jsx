@@ -19,7 +19,7 @@ export default function ProductTabs({ product }) {
       dir={isRTL ? "rtl" : "ltr"}
       className="w-full mx-auto md:px-4 mt-16 mb-4"
     >
-      <div className="flex md:flex-wrap gap-3 w-full">
+      <div className="flex md:flex-wrap md:gap-3 md:w-full w-[45%] gap-1">
         <TabButton active={activeTab === "desc"} onClick={() => setActiveTab("desc")}>
           {t("single.tabs.description")}
         </TabButton>
