@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const client = axios.create({
-  baseURL: "http://localhost:4000/api/v1",
+  baseURL: "https://01-app.liara.run",
   headers: {
     "Content-Type": "application/json",
   },

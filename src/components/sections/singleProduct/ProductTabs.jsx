@@ -76,8 +76,8 @@ function TabButton({ active, children, onClick }) {
     <button
       onClick={onClick}
       className={`
-        md:px-6 px-2 py-2 md:py-3 md:w-[190px]
-        rounded-t-xl md:text-sm text-[14px] sm:text-base border
+        md:px-6 px-2 py-2 md:py-3 md:w-47.5 w-40
+        rounded-t-xl text-[12px] md:text-[14px] sm:text-base border
         transition
         ${
           active
